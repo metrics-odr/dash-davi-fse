@@ -500,6 +500,23 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             "ml": to_float(cell(row, midx["leads"])),
         })
 
+    # --- DIAGNÓSTICO (temporário): leads "meta" em dias sem gasto no Meta ---
+    from collections import Counter
+    spend_by_day = Counter()
+    for m_ in meta:
+        spend_by_day[m_["d"]] += m_["sp"]
+    meta_camps = {m_["camp"] for m_ in meta}
+    meta_ads = {m_["ad"] for m_ in meta}
+    paid_leads = [l for l in leads if l["src"] == "meta"]
+    nospend = [l for l in paid_leads if spend_by_day.get(l["d"], 0) <= 0]
+    print(f"  [diag] leads meta: {len(paid_leads)} | em dia SEM gasto: {len(nospend)}", file=sys.stderr)
+    print(f"  [diag] leads meta com camp em Meta: {sum(l['camp'] in meta_camps for l in paid_leads)} | com ad em Meta: {sum(l['ad'] in meta_ads for l in paid_leads)}", file=sys.stderr)
+    print(f"  [diag] leads meta com camp '(campanha não informada)': {sum(l['camp'].startswith('(campanha') for l in paid_leads)}", file=sys.stderr)
+    for l in sorted(nospend, key=lambda x: x["d"] or "")[-25:]:
+        print(f"  [diag] sem-gasto {l['d']} camp={l['camp'][:45]!r} adset={l['adset'][:30]!r} ad={l['ad'][:30]!r}", file=sys.stderr)
+    print("  [diag] campanhas Meta (amostra): " + " | ".join(sorted(meta_camps)[:8]), file=sys.stderr)
+    print("  [diag] gasto por dia (out/2026): " + ", ".join(f"{d[8:]}={v:.0f}" for d, v in sorted(spend_by_day.items()) if d and d.startswith("2026-10")), file=sys.stderr)
+
     # Leads (LP) — fonte antiga, fora de uso. Só contamos o total para
     # referência (não entra em leads[]/gráficos/tabelas/conversão).
     leads_lp_total = sum(
