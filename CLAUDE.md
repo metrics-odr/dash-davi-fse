@@ -1,64 +1,30 @@
-# CLAUDE.md — Contexto do projeto (TEMPLATE High Ticket)
+# CLAUDE.md — Dashboard Secre App · Funil "Publicar Vaga"
 
-> Este arquivo é lido automaticamente pelo Claude Code ao abrir o repositório.
-> Ele carrega TODO o contexto necessário para continuar o trabalho sem depender
-> de mensagens anteriores. Mantenha-o atualizado.
->
-> **Este é um TEMPLATE limpo.** Todos os valores específicos do cliente estão
-> marcados como `<<PREENCHER: descrição>>`. Siga o CHECKLIST abaixo para
-> configurar um cliente novo.
+> Lido automaticamente pelo Claude Code ao abrir o repositório. Mantenha atualizado.
+> Repositório: `metrics-odr/dash-davi-fse` · Pages: `https://metrics-odr.github.io/dash-davi-fse/`
 
----
+## 🚀 REGRA DE PUBLICAÇÃO (obrigatória)
 
-## ✅ CHECKLIST DE NOVO CLIENTE (fazer em ordem)
+Sempre que uma alteração for concluída, o Claude deve **oferecer um botão/ação
+escrito "Publicar"** (via AskUserQuestion com a opção "Publicar"). Ao confirmar,
+o Claude **abre o Pull Request e já faz a mesclagem (merge) na `main`** — tudo na
+sequência, sem pedir mais nada — para a alteração ir ao ar no GitHub Pages o
+quanto antes (o push na `main` dispara o `deploy.yml`). Depois informa o status
+do Actions e a URL pública.
 
-Preencha cada `<<PREENCHER: …>>` do repositório. Ordem sugerida:
+## Configuração do cliente
 
-1. **`build/build.py` — constantes do topo:**
-   - `SPREADSHEET_ID` — ID da planilha central do Google Sheets do cliente.
-   - `GID_CONVERSAS` — gid da aba de Conversas (fonte principal de leads).
-   - `GID_LEADS` — gid da aba de Leads legado (popup/form; só contada).
-   - `GID_META` — gid da aba Meta Ads.
-   - `GID_SALES` — gid da aba de Compradores (New Subscriptions).
-   - `CLIENT_NAME`, `MAIN_PRODUCT` — nome do cliente e da oferta principal.
-   - `MAIN_PRODUCT_PREFIX` — prefixo comum às campanhas do cliente.
-   - `TAX_FACTOR` — fator de imposto/taxa da mídia paga (Meta Ads). **Default do
-     template: `1.13806`** (13,806%) — já vem pronto para todo cliente novo;
-     só ajuste se o cliente tiver um fator diferente, ou use `1.0` se não
-     houver imposto.
-2. **`build/build.py` — critério de MQL:** ajuste `is_medico()` e os aliases da
-   coluna de qualificação em `process()` (`"medico": [...]` + índice de fallback)
-   ao critério e ao cabeçalho da aba Conversas do cliente.
-3. **`build/app.js`:** revisar os rótulos fixos de UI que citam o critério de MQL
-   ("MQLs (...)") e o agrupamento de "faixa"/especialidade — o critério de
-   `build.py` não propaga sozinho para esses textos.
-4. **`build/template.html`:** preencher `<title>` e o logo (`logo-main`/`logo-sub`)
-   com o nome/slogan do cliente. (Opcional: trocar o favicon base64.)
-5. **`build/identidade-visual.css`:** ajustar cores se o cliente tiver identidade
-   própria (opcional — o default funciona).
-6. **`README.md` / `SETUP-CRON.md` / este `CLAUDE.md` / `AGENTS.md`:** owner/repo
-   do GitHub, URL do GitHub Pages, nome do cliente, planilha/gids.
-7. **`build/GUIA-RELATORIOS.md`:** preencher o "Contexto do funil" (cliente,
-   oferta, critério de MQL).
-8. **GitHub Pages + Actions:** confirmar que `build/` + `.github/workflows/deploy.yml`
-   estão na `main` (ativa `workflow_dispatch`); rodar o workflow uma vez.
-9. **cron-job.org:** seguir `SETUP-CRON.md` — token fine-grained novo (Actions:
-   read/write, só neste repo), nunca reaproveitar um token exposto em chat.
-10. **Insights de Tráfego (opcional):** `build/relatorios.json` e
-    `build/relatorios_dados.json` começam vazios (`{}`). Para ativar os Insights:
-    - deixar a Routine do Actions `briefing.yml` rodar (gera `relatorios_dados.json`
-      com os números), e
-    - criar a **Routine do Claude** (`create_trigger` apontando para este repo)
-      que lê os números + os 2 guias e escreve `relatorios.json` na `main`
-      (ver "Briefing automático" abaixo). **Não vem pronta** — precisa ser
-      recriada por cliente.
-11. **Testar local** com CSVs de amostra antes de publicar (3 páginas, tema
-    claro/escuro, multi-seleção).
-
-> **Fora do escopo deste template:** não há Cloudflare Worker nem chamada paga à
-> API da Anthropic no pipeline. A automação de Insights é feita por Routine
-> agendada do Claude Code (item 10). Se o cliente precisar de outra camada, é
-> desenvolvimento novo.
+- **Cliente:** Secre App · **Funil:** Publicar Vaga (Sessão Estratégica padrão).
+- **Leads:** planilha `16FOsujjmymRJdj0tMdFy08qfRJtvXyXIw8HCwHDwwAA`, gid `1895619916`.
+  Só entram linhas com coluna **Funil = SE ou FSE**. Com UTMs/anúncio = tráfego pago;
+  sem = orgânico.
+- **Meta Ads:** planilha `1DY-ANjvq1-ui2PBfICYeqSDhwCte1vfer_ctK8bmEN0`, gid `0`.
+- **Compradores:** aguardando (`GID_SALES` vazio → aba ignorada, vendas "-").
+- **MQL:** coluna Faturamento = **R$ 100 a 500 mil** (`parse_faixa_faturamento`/`is_mql`
+  em `build.py`). Grafias variam: "MM"/"milhões" = milhões; "mil" = mil.
+- **Agendamentos:** não monitorados por enquanto.
+- Prefixo de campanha: nenhum (todas entram). `TAX_FACTOR` = 1.13806.
+- Sandbox não alcança `docs.google.com`; o runner do Actions alcança.
 
 ---
 
@@ -69,25 +35,24 @@ puro + Chart.js via CDN) publicado no **GitHub Pages**, que cruza a lista de
 **Leads** com o gerenciador de mídia paga e se atualiza sozinho a cada ~30 min
 (build 100% na nuvem via GitHub Actions, disparado externamente pelo cron-job.org).
 
-- **URL pública:** `https://<<PREENCHER: owner do GitHub>>.github.io/<<PREENCHER: nome do repositório>>/`
+- **URL pública:** `https://metrics-odr.github.io/dash-davi-fse/`
 - **Somente leitura** das planilhas. Nunca escrever de volta.
 
 ## Fontes de dados (Google Sheets)
 
-Spreadsheet ID: `<<PREENCHER: SPREADSHEET_ID>>` ("<<PREENCHER: nome da planilha central>>").
+Duas planilhas (ver "Configuração do cliente"): Leads e Meta Ads.
 
 | Aba | gid | Colunas usadas |
 |-----|-----|----------------|
-| **Conversas** (fonte principal — webhook de mensageria/WhatsApp) | `<<PREENCHER: GID_CONVERSAS>>` | `Data` · `Mensagem` · `Nome` · `Telefone` · coluna de MQL · `Campanha` · `Conjunto` · `Anúncio` · `Especialidades` |
-| **Leads** (legado — popup/form antigo, só contada) | `<<PREENCHER: GID_LEADS>>` | `Data` · `Nome` · `Email` · `Telefone` · coluna de MQL · `Especialidade` · `utm_*` · `MQL` · `Compra Detectada`/`Faturamento Detectado`/`Data Compra` |
-| **Meta Ads** | `<<PREENCHER: GID_META>>` | `Day` · `Ad ID` · `Campaign Name` · `Ad Set Name` · `Ad Name` · `Amount Spent` · `Impressions` · `Link Clicks` · `Landing Page Views` · `Content Views` · `Adds to Cart` · `Subscriptions` · `Subscribe Conversion Value` |
-| **New Subscriptions** (Compradores) | `<<PREENCHER: GID_SALES>>` | `Data` · `Nome` · `Email` · `Telefone` · `Produto` · `Oferta` · `Faturamento` · `Receita` · `Método de Pagamento` · `Campanha` · `Conjunto` · `Anúncio` · `UF` · `Cidade` · `Zip Code` · `Endereço` |
+| **Conversas** (fonte principal — webhook de mensageria/WhatsApp) | `1895619916` (planilha Leads) | `Data` · `Mensagem` · `Nome` · `Telefone` · coluna de MQL · `Campanha` · `Conjunto` · `Anúncio` · `Especialidades` |
+| **Leads** (legado — popup/form antigo, só contada) | — (não usada) | `Data` · `Nome` · `Email` · `Telefone` · coluna de MQL · `Especialidade` · `utm_*` · `MQL` · `Compra Detectada`/`Faturamento Detectado`/`Data Compra` |
+| **Meta Ads** | `0` (planilha Meta Ads) | `Day` · `Ad ID` · `Campaign Name` · `Ad Set Name` · `Ad Name` · `Amount Spent` · `Impressions` · `Link Clicks` · `Landing Page Views` · `Content Views` · `Adds to Cart` · `Subscriptions` · `Subscribe Conversion Value` |
+| **New Subscriptions** (Compradores) | aguardando | `Data` · `Nome` · `Email` · `Telefone` · `Produto` · `Oferta` · `Faturamento` · `Receita` · `Método de Pagamento` · `Campanha` · `Conjunto` · `Anúncio` · `UF` · `Cidade` · `Zip Code` · `Endereço` |
 
 URL de export CSV: `https://docs.google.com/spreadsheets/d/<ID>/export?format=csv&gid=<GID>`
 
 ### Regra de Lead Qualificado (MQL)
-Coluna de qualificação (<<PREENCHER: nome da coluna de MQL, ex. "É médico?">>) == "Sim".
-Lógica em `build.py` → `is_medico`. O gráfico "Leads por especialidade" (`app.js`,
+Coluna Faturamento entre R$ 100 e 500 mil. Lógica em `build.py` → `is_mql`. O gráfico "Leads por especialidade" (`app.js`,
 `renderGeralCore`) colore verde/cinza pelo mesmo critério, usando a coluna
 `Especialidades`/`Especialidade` como dimensão.
 
@@ -127,10 +92,10 @@ volta ao gasto sem imposto. Se o cliente tiver um fator diferente, ajuste
 `TAX_FACTOR`; se não houver imposto, use `TAX_FACTOR = 1.0`.
 
 ### Convenções de campanha (do cliente)
-Todas as campanhas usam o prefixo `<<PREENCHER: MAIN_PRODUCT_PREFIX>>`
+Todas as campanhas usam o prefixo (vazio)
 (`MAIN_PRODUCT_PREFIX`), sem filtrar por sub-funil — mantém TODAS as campanhas
 no dashboard. Ajuste o prefixo e, se o cliente usar siglas de etapa
-(ex. `<<PREENCHER: siglas de etapa, se houver>>`), documente-as aqui. A Conversas
+(nenhuma sigla definida), documente-as aqui. A Conversas
 já traz `Campanha`/`Conjunto`/`Anúncio` prontos (nomes idênticos ao
 `Campaign Name`/`Ad Set Name`/`Ad Name` do Meta Ads) — `build.py` só copia esses
 valores, sem precisar de UTM nessa aba.
