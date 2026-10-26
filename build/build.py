@@ -5,8 +5,8 @@ Gera a dashboard estatica (index.html) do funil "Sessão Estratégica" (Davi Bra
 partir de DUAS planilhas do Google Sheets (somente leitura):
 
   - Planilha de LEADS (aba "Leads Totais_planilha nova", gid 1895619916): fonte
-    PRINCIPAL de leads. So entram linhas cujo "Funil" e' SE ou FSE. Leads de
-    trafego pago vem com UTMs/anuncio preenchidos; os demais sao organicos.
+    PRINCIPAL de leads. So entram linhas cujo "Funil" e' SE ou FSE. Trafego
+    pago = campanha existe na planilha do Meta Ads; os demais sao organicos.
   - Planilha de META ADS (gid 0): investimento/impressoes/cliques do gerenciador.
   - Compradores / New Subscriptions: AGUARDANDO (GID_SALES vazio = aba ignorada;
     vendas/faturamento aparecem "-" ate chegar).
@@ -380,6 +380,31 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
     if cheader and cidx["funil"] is None:
         raise SystemExit("ERRO: coluna 'Funil' não encontrada na aba de Leads.")
 
+    mheader = meta_rows[0] if meta_rows else []
+    midx = header_index(
+        mheader,
+        {"day": ["day", "data"], "campaign": ["campaign name", "campaign"], "adset": ["ad set name", "adset"],
+         "ad": ["ad name"], "spent": ["amount spent", "valor gasto", "gasto"], "impr": ["impressions", "impress"],
+         "clicks": ["link clicks", "clicks", "cliques"], "leads": ["leads"],
+         "pv": ["landing page views", "page views", "pageviews"],
+         # Cliente não tem evento "Initiate Checkout" configurado no pixel — usa
+         # "Adds to Cart" como proxy de Checkout (decisão do cliente).
+         "chk": ["adds to cart", "add to cart", "initiate checkout", "checkouts iniciados", "checkouts"],
+         # Link do criativo (ex. Instagram) — coluna opcional adicionada pelo cliente
+         # na aba de mídia. Usada na aba Relatório (Top/Piores anúncios) para linkar
+         # o anúncio. Aliases cobrem variações do cabeçalho.
+         "link": ["creative instagram permalink", "instagram permalink", "permalink",
+                  "creative link", "link do anuncio", "link do criativo"]},
+        {"day": 0, "campaign": 2, "adset": 3, "ad": 4, "spent": 5, "impr": 6, "clicks": 7, "leads": None, "pv": 8},
+    )
+
+    # Campanhas/anúncios que EXISTEM no Meta Ads: só leads cuja campanha está aqui
+    # são tráfego pago. A coluna Campanha da planilha de leads vem preenchida em
+    # TODOS os leads (ex.: bio, cursoeduca, null/direct, teste...), então "ter UTM"
+    # não basta pra ser mídia paga.
+    meta_camps = {cell(r, midx["campaign"]) for r in meta_rows[1:] if cell(r, midx["campaign"])}
+    meta_ads = {cell(r, midx["ad"]) for r in meta_rows[1:] if cell(r, midx["ad"])}
+
     leads = []
     # atribuicao do ANUNCIO/campanha de uma venda por telefone: a 1a conversa
     # daquele telefone (a mais antiga de fato) e' quem levou aquele contato a
@@ -401,11 +426,10 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             continue
         campaign_raw = cell(row, cidx["campaign"])
         ad_raw = cell(row, cidx["ad"]).split("::")[0].strip()   # "AD39_VIDEO_FSE::PAZX.." -> "AD39_VIDEO_FSE"
-        campaign_valid = valid_utm(campaign_raw)
-        paid = campaign_valid or valid_utm(ad_raw)               # tráfego = UTM/anúncio preenchido
+        paid = campaign_raw in meta_camps                        # tráfego pago = campanha existe no Meta Ads
         src = "meta" if paid else "org"
         phone = canon_phone(cell(row, cidx["phone"]))
-        camp = (campaign_raw if campaign_valid else "(campanha não informada)") if paid else "(sem campanha)"
+        camp = campaign_raw if paid else "(sem campanha)"
         adset = (cell(row, cidx["adset"]) or "(sem conjunto)") if paid else "(sem conjunto)"
         ad = (ad_raw or "(sem anúncio)") if paid else "(sem anúncio)"
         conversa_date = parse_date(cell(row, cidx["created"]))
@@ -457,24 +481,6 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
 
     log_unmatched_sales(sales_index, phone_attrib)
 
-    mheader = meta_rows[0] if meta_rows else []
-    midx = header_index(
-        mheader,
-        {"day": ["day", "data"], "campaign": ["campaign name", "campaign"], "adset": ["ad set name", "adset"],
-         "ad": ["ad name"], "spent": ["amount spent", "valor gasto", "gasto"], "impr": ["impressions", "impress"],
-         "clicks": ["link clicks", "clicks", "cliques"], "leads": ["leads"],
-         "pv": ["landing page views", "page views", "pageviews"],
-         # Cliente não tem evento "Initiate Checkout" configurado no pixel — usa
-         # "Adds to Cart" como proxy de Checkout (decisão do cliente).
-         "chk": ["adds to cart", "add to cart", "initiate checkout", "checkouts iniciados", "checkouts"],
-         # Link do criativo (ex. Instagram) — coluna opcional adicionada pelo cliente
-         # na aba de mídia. Usada na aba Relatório (Top/Piores anúncios) para linkar
-         # o anúncio. Aliases cobrem variações do cabeçalho.
-         "link": ["creative instagram permalink", "instagram permalink", "permalink",
-                  "creative link", "link do anuncio", "link do criativo"]},
-        {"day": 0, "campaign": 2, "adset": 3, "ad": 4, "spent": 5, "impr": 6, "clicks": 7, "leads": None, "pv": 8},
-    )
-
     meta = []
     # Anúncio (nome) -> 1 permalink do criativo. "Qualquer um correlato" ao
     # anúncio serve (o mesmo criativo pode rodar em vários dias/conjuntos);
@@ -500,22 +506,8 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             "ml": to_float(cell(row, midx["leads"])),
         })
 
-    # --- DIAGNÓSTICO (temporário): leads "meta" em dias sem gasto no Meta ---
-    from collections import Counter
-    spend_by_day = Counter()
-    for m_ in meta:
-        spend_by_day[m_["d"]] += m_["sp"]
-    meta_camps = {m_["camp"] for m_ in meta}
-    meta_ads = {m_["ad"] for m_ in meta}
-    paid_leads = [l for l in leads if l["src"] == "meta"]
-    nospend = [l for l in paid_leads if spend_by_day.get(l["d"], 0) <= 0]
-    print(f"  [diag] leads meta: {len(paid_leads)} | em dia SEM gasto: {len(nospend)}", file=sys.stderr)
-    print(f"  [diag] leads meta com camp em Meta: {sum(l['camp'] in meta_camps for l in paid_leads)} | com ad em Meta: {sum(l['ad'] in meta_ads for l in paid_leads)}", file=sys.stderr)
-    print(f"  [diag] leads meta com camp '(campanha não informada)': {sum(l['camp'].startswith('(campanha') for l in paid_leads)}", file=sys.stderr)
-    for l in sorted(nospend, key=lambda x: x["d"] or "")[-25:]:
-        print(f"  [diag] sem-gasto {l['d']} camp={l['camp'][:45]!r} adset={l['adset'][:30]!r} ad={l['ad'][:30]!r}", file=sys.stderr)
-    print("  [diag] campanhas Meta (amostra): " + " | ".join(sorted(meta_camps)[:8]), file=sys.stderr)
-    print("  [diag] gasto por dia (out/2026): " + ", ".join(f"{d[8:]}={v:.0f}" for d, v in sorted(spend_by_day.items()) if d and d.startswith("2026-10")), file=sys.stderr)
+    n_paid = sum(1 for l in leads if l["src"] == "meta")
+    print(f"  leads de tráfego pago (campanha existe no Meta Ads): {n_paid}/{len(leads)}", file=sys.stderr)
 
     # Leads (LP) — fonte antiga, fora de uso. Só contamos o total para
     # referência (não entra em leads[]/gráficos/tabelas/conversão).

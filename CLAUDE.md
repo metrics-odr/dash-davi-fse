@@ -16,8 +16,8 @@ do Actions e a URL pública.
 
 - **Cliente:** Davi Braga · **Funil:** Sessão Estratégica (Sessão Estratégica padrão).
 - **Leads:** planilha `16FOsujjmymRJdj0tMdFy08qfRJtvXyXIw8HCwHDwwAA`, gid `1895619916`.
-  Só entram linhas com coluna **Funil = SE ou FSE**. Com UTMs/anúncio = tráfego pago;
-  sem = orgânico.
+  Só entram linhas com coluna **Funil = SE ou FSE**. Tráfego pago = lead cuja **Campanha existe na
+  planilha do Meta Ads**; o resto (bio, cursoeduca, direct/null, testes…) é orgânico.
 - **Meta Ads:** planilha `1DY-ANjvq1-ui2PBfICYeqSDhwCte1vfer_ctK8bmEN0`, gid `0`.
 - **Compradores:** aguardando (`GID_SALES` vazio → aba ignorada, vendas "-").
 - **MQL:** coluna Faturamento = **R$ 100 a 500 mil** (`parse_faixa_faturamento`/`is_mql`

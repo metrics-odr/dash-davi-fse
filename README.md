@@ -25,7 +25,7 @@ por anúncio, e é publicada no **GitHub Pages**. Reconstrói sozinha a cada
 Coluna **Faturamento** na faixa de **R$ 100 a 500 mil**. O texto tem várias grafias
 ("DE 100 A 500 MIL", "2MM", "2 milhões", "1-4 MM"); `MM`/"milhões" = milhões, `mil` = mil.
 Lógica em `build.py` → `parse_faixa_faturamento` / `is_mql`. Só entram leads com
-**Funil = SE ou FSE**; leads de tráfego trazem UTMs/anúncio, os demais são orgânicos.
+**Funil = SE ou FSE**; leads de tráfego pago têm campanha que existe no Meta Ads, os demais são orgânicos.
 
 ## Fontes de dados (somente leitura)
 
