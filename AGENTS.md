@@ -4,8 +4,8 @@
 > projeto. Este arquivo é um resumo para agentes/ferramentas que seguem a
 > convenção `AGENTS.md`.
 >
-> **Este é um TEMPLATE limpo.** Todos os valores do cliente estão como
-> `<<PREENCHER: descrição>>`.
+> **Este é um TEMPLATE limpo.** Configuração do cliente (Secre App · Publicar Vaga) e regra de
+> publicação ("Publicar" = abrir PR + merge na `main`) estão em `CLAUDE.md`.
 
 ## ✅ CHECKLIST DE NOVO CLIENTE (fazer em ordem)
 
@@ -46,7 +46,7 @@ coleta/redação dos Insights. Ver `GUIA-REPLICACAO.md` para os detalhes de
 implementação (filtro cruzado, engine de tabela, gráficos Chart.js).
 
 > `template.html` e `app.js` são engine, mas carregam o nome do cliente em pontos
-> pontuais (título/logo e um comentário) — já marcados como `<<PREENCHER>>`.
+> pontuais (título/logo e um comentário) — já preenchidos para o Secre App.
 
 ## Específico do cliente (troca a cada replicação)
 `build/build.py`, `build/identidade-visual.css` (cores, se aplicável),

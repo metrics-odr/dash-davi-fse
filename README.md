@@ -1,13 +1,12 @@
-# Dashboard de Captura de Leads · <<PREENCHER: nome do cliente>>
+# Dashboard de Captura de Leads · Secre App · Publicar Vaga
 
-Dashboard **100% na nuvem** do Funil de High Ticket de **<<PREENCHER: nome do
-cliente>>** que cruza a aba **Conversas** (leads via WhatsApp/mensageria) com o
+Dashboard **100% na nuvem** do Funil de High Ticket de **Secre App (Publicar Vaga)** que cruza a aba **Conversas** (leads via WhatsApp/mensageria) com o
 investimento de mídia paga (**Meta Ads**) e com a lista de **Compradores**,
 calcula os **Leads Qualificados (MQLs)** e as **Vendas/Faturamento** atribuídos
 por anúncio, e é publicada no **GitHub Pages**. Reconstrói sozinha a cada
 ~30 min, disparada pelo **cron-job.org** — sem depender de nenhum PC ligado.
 
-**URL pública:** `https://<<PREENCHER: owner do GitHub>>.github.io/<<PREENCHER: nome do repositório>>/`
+**URL pública:** `https://metrics-odr.github.io/dash-davi-fse/`
 
 ---
 
@@ -23,20 +22,22 @@ por anúncio, e é publicada no **GitHub Pages**. Reconstrói sozinha a cada
 
 ## Critério de Lead Qualificado (MQL)
 
-Coluna de qualificação do cliente (<<PREENCHER: nome da coluna de MQL, ex. "É médico?">>)
-== "Sim". Lógica em `build.py` → `is_medico` (renomeie/ajuste ao critério do cliente).
+Coluna **Faturamento** na faixa de **R$ 100 a 500 mil**. O texto tem várias grafias
+("DE 100 A 500 MIL", "2MM", "2 milhões", "1-4 MM"); `MM`/"milhões" = milhões, `mil` = mil.
+Lógica em `build.py` → `parse_faixa_faturamento` / `is_mql`. Só entram leads com
+**Funil = SE ou FSE**; leads de tráfego trazem UTMs/anúncio, os demais são orgânicos.
 
 ## Fontes de dados (somente leitura)
 
-Planilha central `<<PREENCHER: nome da planilha central>>`
-(`<<PREENCHER: SPREADSHEET_ID>>`):
+Duas planilhas: **Leads** (`16FOsujjmymRJdj0tMdFy08qfRJtvXyXIw8HCwHDwwAA`) e
+**Meta Ads** (`1DY-ANjvq1-ui2PBfICYeqSDhwCte1vfer_ctK8bmEN0`):
 
 | Aba | gid | Uso |
 |-----|-----|-----|
-| Conversas (fonte principal) | `<<PREENCHER: GID_CONVERSAS>>` | fonte **principal** de leads (webhook/mensageria) — usada em todos os gráficos/cards/tabelas |
-| Leads (legado) | `<<PREENCHER: GID_LEADS>>` | popup/form antigo — só contada (total), não entra em cálculo algum |
-| Meta Ads | `<<PREENCHER: GID_META>>` | gasto, impressões, cliques |
-| New Subscriptions (Compradores) | `<<PREENCHER: GID_SALES>>` | cruzada por telefone com a Conversas → Vendas/Faturamento por anúncio |
+| Leads Totais_planilha nova (fonte principal) | `1895619916` | fonte **principal** de leads, filtrada por Funil SE/FSE |
+| Leads (legado) | — | não usada neste funil |
+| Meta Ads | `0` (planilha Meta Ads) | gasto, impressões, cliques |
+| New Subscriptions (Compradores) | _aguardando_ | cruzada por telefone com a Conversas → Vendas/Faturamento por anúncio |
 
 O build lê essas abas via **export CSV público** (`.../export?format=csv&gid=...`).
 **Nada é escrito de volta** nas planilhas.

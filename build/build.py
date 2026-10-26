@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Gera a dashboard estatica (index.html) a partir de 4 abas da planilha central
-<<PREENCHER: nome da planilha central do cliente>>:
+Gera a dashboard estatica (index.html) do funil "Publicar Vaga" (Secre App) a
+partir de DUAS planilhas do Google Sheets (somente leitura):
 
-  - "Conversas" (gid <<PREENCHER: GID_CONVERSAS>>): fonte PRINCIPAL de leads — webhook
-    de mensageria disparado na 1a mensagem recebida no WhatsApp Business. Usada em
-    TODOS os graficos/cards/tabelas/calculos de conversao.
-  - "Leads" (gid <<PREENCHER: GID_LEADS>>): fonte ANTIGA (popup/form legado). So e
-    contada (total), nunca entra em grafico/card/tabela/conversao.
-  - "Meta Ads" (gid <<PREENCHER: GID_META>>): investimento/impressoes/cliques do gerenciador.
-  - "New Subscriptions" / Compradores (gid <<PREENCHER: GID_SALES>>): usada para cruzar por
-    TELEFONE com a Conversas e atribuir Venda/Faturamento ao anuncio de origem.
+  - Planilha de LEADS (aba "Leads Totais_planilha nova", gid 1895619916): fonte
+    PRINCIPAL de leads. So entram linhas cujo "Funil" e' SE ou FSE. Leads de
+    trafego pago vem com UTMs/anuncio preenchidos; os demais sao organicos.
+  - Planilha de META ADS (gid 0): investimento/impressoes/cliques do gerenciador.
+  - Compradores / New Subscriptions: AGUARDANDO (GID_SALES vazio = aba ignorada;
+    vendas/faturamento aparecem "-" ate chegar).
 
-Criterio de Lead Qualificado (MQL): coluna de qualificacao do cliente
-(<<PREENCHER: nome da coluna de MQL, ex. "E medico?">>) == "Sim". Ajuste is_medico()
-e os aliases de coluna em process() para o criterio deste cliente.
+Criterio de Lead Qualificado (MQL): coluna "Faturamento" na faixa de R$ 100 a
+500 mil (texto livre com varias grafias — ver parse_faixa_faturamento / is_mql).
 
 Este script apenas LE as planilhas (export CSV publico) e emite os REGISTROS
 BRUTOS (leads[], meta[] e sales[]) dentro do HTML. sales[] tem um registro POR
@@ -43,19 +40,21 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
-SPREADSHEET_ID = "<<PREENCHER: ID da planilha central (Google Sheets) do cliente>>"
-GID_CONVERSAS = "<<PREENCHER: gid da aba de Conversas / fonte principal de leads>>"
-GID_LEADS = "<<PREENCHER: gid da aba de Leads legado (popup/form) — só contada>>"
-GID_META = "<<PREENCHER: gid da aba Meta Ads>>"
-GID_SALES = "<<PREENCHER: gid da aba de Compradores (New Subscriptions) — cruzada por telefone>>"
+SPREADSHEET_ID = "16FOsujjmymRJdj0tMdFy08qfRJtvXyXIw8HCwHDwwAA"        # planilha de Leads
+SPREADSHEET_ID_META = "1DY-ANjvq1-ui2PBfICYeqSDhwCte1vfer_ctK8bmEN0"   # planilha de Meta Ads (separada)
+GID_CONVERSAS = "1895619916"   # aba de Leads (fonte principal; filtrada por Funil SE/FSE)
+GID_LEADS = ""                 # sem fonte legada neste funil (vazio = ignorada)
+GID_META = "0"
+GID_SALES = ""                 # Compradores: aguardando (vazio = ignorada)
+FUNIS_VALIDOS = ("se", "fse")  # valores aceitos na coluna "Funil"
 EXPORT_URL = "https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
 
 # Identificação do cliente/conta (usada só em textos/relatórios — não afeta o cruzamento de dados).
-CLIENT_NAME = "<<PREENCHER: nome do cliente>>"
-MAIN_PRODUCT = "<<PREENCHER: nome do produto/oferta principal>>"
+CLIENT_NAME = "Secre App"
+MAIN_PRODUCT = "Publicar Vaga"
 # Prefixo comum a TODAS as campanhas da conta (usado para agrupar campanhas no
 # dashboard). Ajuste ao padrão de nomenclatura de campanha deste cliente.
-MAIN_PRODUCT_PREFIX = "<<PREENCHER: prefixo das campanhas do cliente, ex. NOMECLIENTE>>"
+MAIN_PRODUCT_PREFIX = ""   # vazio: sem filtro por prefixo, todas as campanhas entram
 
 BRT = timezone(timedelta(hours=-3))   # horario de Brasilia (exibicao)
 TAX_FACTOR = 1.13806   # fator padrão de imposto/taxa sobre o gasto de mídia paga (Meta Ads) = 13,806%.
@@ -166,12 +165,49 @@ def is_test_lead(rowtext: str) -> bool:
     return "<test lead" in rowtext.lower()
 
 
-# <<PREENCHER: critério de MQL deste cliente>> — implementação de referência abaixo
-# usa uma coluna booleana "Sim/Não". Renomeie a função e ajuste conforme o critério
-# de qualificação do cliente (o exemplo abaixo qualifica pela coluna de MQL == "Sim").
-def is_medico(v: str | None) -> bool:
-    """Critério de MQL: coluna de qualificação (<<PREENCHER: nome da coluna>>) == "Sim"."""
-    return norm(v) in ("sim", "s", "yes", "true", "1")
+# Critério de MQL (Secre App): faturamento declarado entre R$ 100 mil e R$ 500 mil.
+# O texto da resposta tem várias grafias ("DE 100 A 500 MIL", "100 mil a 500 mil",
+# "2MM", "2 milhões", "1-4 MM", "DE 4M A 10M"). Regra de unidade: "MM"/"milhão/
+# milhões" = milhões; "mil" = mil; "M" sozinho = mil quando o número é >= 100
+# (ex. "500M") e milhões quando é < 100 (ex. "4M", "10M"). Número sem unidade
+# herda a unidade do número seguinte ("100 a 500 mil", "1-4 MM").
+_NUM_UNIT = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mm|milhoes|milhao|mil|m)?(?![a-z])")
+
+
+def parse_faixa_faturamento(v: str | None):
+    """Devolve (min, max) em reais da faixa escrita, ou None se não der pra ler."""
+    t = norm(v)
+    toks = []
+    for m in _NUM_UNIT.finditer(t):
+        n = float(m.group(1).replace(",", "."))
+        u = m.group(2)
+        toks.append([n, u])
+    if len(toks) < 2:
+        return None
+    nxt = None
+    for tk in reversed(toks):
+        if tk[1] is None:
+            tk[1] = nxt
+        else:
+            nxt = tk[1]
+    vals = []
+    for n, u in toks:
+        if u in ("mm", "milhoes", "milhao"):
+            mult = 1_000_000
+        elif u == "mil":
+            mult = 1_000
+        elif u == "m":
+            mult = 1_000 if n >= 100 else 1_000_000
+        else:
+            return None
+        vals.append(n * mult)
+    return vals[0], vals[1]
+
+
+def is_mql(v: str | None) -> bool:
+    """MQL = faturamento entre 100 e 500 mil."""
+    r = parse_faixa_faturamento(v)
+    return bool(r) and abs(r[0] - 100_000) < 1 and abs(r[1] - 500_000) < 1
 
 
 def pretty_specialty(v: str) -> str:
@@ -238,14 +274,23 @@ def header_index(header, wanted, fallback):
     hn = [norm(h) for h in header]
     for key, aliases in wanted.items():
         found = None
-        for a in aliases:
+        for a in aliases:                       # 1o passe: nome exato
             a = norm(a)
             for i, h in enumerate(hn):
-                if h == a or (a and a in h):
+                if h == a:
                     found = i
                     break
             if found is not None:
                 break
+        if found is None:
+            for a in aliases:                   # 2o passe: contém
+                a = norm(a)
+                for i, h in enumerate(hn):
+                    if a and a in h:
+                        found = i
+                        break
+                if found is not None:
+                    break
         idx[key] = found if found is not None else fallback.get(key)
     return idx
 
@@ -320,15 +365,20 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
     sales_index = build_sales_index(sales_rows)
 
     cheader = conversas_rows[0] if conversas_rows else []
-    # <<PREENCHER: aliases da coluna de MQL do cliente>> — "medico" abaixo é o exemplo
-    # (ajuste os aliases e o índice de fallback ao cabeçalho da aba Conversas do cliente).
+    print("  [leads] cabeçalhos: " + " | ".join(h.strip() for h in cheader), file=sys.stderr)
     cidx = header_index(
         cheader,
         {"created": ["data"], "phone": ["telefone"], "name": ["nome"],
-         "medico": ["e medico", "medico"], "campaign": ["campanha"],
-         "adset": ["conjunto"], "ad": ["anuncio"], "specialty": ["especialidades", "especialidade"]},
-        {"created": 0, "phone": 3, "name": 2, "medico": 4, "campaign": 8, "adset": 9, "ad": 10, "specialty": 11},
+         "fat": ["faturamento"], "funil": ["funil"],
+         "campaign": ["utm_campaign", "campanha", "campaign"],
+         "adset": ["utm_medium", "conjunto", "adset", "ad set"],
+         "ad": ["anuncio", "utm_content", "ad name"]},
+        {"created": 3, "phone": 1, "name": None, "fat": 8, "funil": 20, "campaign": None,
+         "adset": None, "ad": 6},
     )
+    print(f"  [leads] colunas mapeadas: {cidx}", file=sys.stderr)
+    if cheader and cidx["funil"] is None:
+        raise SystemExit("ERRO: coluna 'Funil' não encontrada na aba de Leads.")
 
     leads = []
     # atribuicao do ANUNCIO/campanha de uma venda por telefone: a 1a conversa
@@ -346,18 +396,23 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
     for row in rows_sorted:
         if is_test_lead(" ".join(str(c) for c in row)):
             continue
+        # Só leads dos funis SE / FSE (coluna "Funil").
+        if norm(cell(row, cidx["funil"])) not in FUNIS_VALIDOS:
+            continue
         campaign_raw = cell(row, cidx["campaign"])
+        ad_raw = cell(row, cidx["ad"]).split("::")[0].strip()   # "AD39_VIDEO_FSE::PAZX.." -> "AD39_VIDEO_FSE"
         campaign_valid = valid_utm(campaign_raw)
-        src = "meta" if campaign_valid else "org"
+        paid = campaign_valid or valid_utm(ad_raw)               # tráfego = UTM/anúncio preenchido
+        src = "meta" if paid else "org"
         phone = canon_phone(cell(row, cidx["phone"]))
-        camp = campaign_raw if campaign_valid else "(sem campanha)"
-        adset = cell(row, cidx["adset"]) if campaign_valid else "(sem conjunto)"
-        ad = cell(row, cidx["ad"]) if campaign_valid else "(sem anúncio)"
+        camp = (campaign_raw if campaign_valid else "(campanha não informada)") if paid else "(sem campanha)"
+        adset = (cell(row, cidx["adset"]) or "(sem conjunto)") if paid else "(sem conjunto)"
+        ad = (ad_raw or "(sem anúncio)") if paid else "(sem anúncio)"
         conversa_date = parse_date(cell(row, cidx["created"]))
         if phone and phone not in attributed_phones:
             attributed_phones.add(phone)
             phone_attrib[phone] = {"src": src, "camp": camp, "adset": adset, "ad": ad, "d": conversa_date}
-        specialty = pretty_specialty(cell(row, cidx["specialty"]))
+        specialty = pretty_specialty(cell(row, cidx["fat"]))   # faixa de faturamento declarada
         leads.append({
             "d": parse_date(cell(row, cidx["created"])),
             "src": src,
@@ -367,8 +422,8 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             "ad": ad,
             "prof": specialty,
             "bucket": specialty,
-            "q": 1 if is_medico(cell(row, cidx["medico"])) else 0,
-            "utm": 1 if campaign_valid else 0,
+            "q": 1 if is_mql(cell(row, cidx["fat"])) else 0,
+            "utm": 1 if paid else 0,
             "nm": first_last_initial(cell(row, cidx["name"])),
             "em": "—",
             "ph": mask_phone(cell(row, cidx["phone"])),
@@ -543,10 +598,15 @@ def main():
     ap.add_argument("--out", default="dist/index.html")
     args = ap.parse_args()
 
-    conversas_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_CONVERSAS), args.conversas_file)
-    meta_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_META), args.meta_file)
-    sales_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_SALES), args.sales_file)
-    leads_lp_rows = load_rows(EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_LEADS), args.leads_file)
+    def load_opt(sid, gid, local):
+        if not local and not gid:       # aba sem gid configurado (ex. Compradores) = vazia
+            return []
+        return load_rows(EXPORT_URL.format(sid=sid, gid=gid), local)
+
+    conversas_rows = load_opt(SPREADSHEET_ID, GID_CONVERSAS, args.conversas_file)
+    meta_rows = load_opt(SPREADSHEET_ID_META, GID_META, args.meta_file)
+    sales_rows = load_opt(SPREADSHEET_ID, GID_SALES, args.sales_file)
+    leads_lp_rows = load_opt(SPREADSHEET_ID, GID_LEADS, args.leads_file)
 
     data = process(conversas_rows, meta_rows, sales_rows, leads_lp_rows)
 
