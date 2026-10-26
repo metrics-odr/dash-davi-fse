@@ -404,8 +404,17 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
     # não basta pra ser mídia paga.
     meta_camps = {cell(r, midx["campaign"]) for r in meta_rows[1:] if cell(r, midx["campaign"])}
     meta_ads = {cell(r, midx["ad"]) for r in meta_rows[1:] if cell(r, midx["ad"])}
+    # (campanha, dia) com gasto > 0: lead só é mídia paga se a campanha realmente
+    # teve investimento NAQUELE dia (UTMs de campanhas pausadas/links antigos ou
+    # testes não contam como tráfego pago do dia).
+    spend_camp_day: set[tuple[str, str]] = set()
+    for r in meta_rows[1:]:
+        d_ = parse_date(cell(r, midx["day"]))
+        if d_ and to_float(cell(r, midx["spent"])) > 0:
+            spend_camp_day.add((cell(r, midx["campaign"]), d_))
 
     leads = []
+    reclass = []   # leads de campanha do Meta em dia SEM gasto da campanha (viram orgânicos)
     # atribuicao do ANUNCIO/campanha de uma venda por telefone: a 1a conversa
     # daquele telefone (a mais antiga de fato) e' quem levou aquele contato a
     # comprar, entao e' ela que define camp/adset/ad da venda — evita atribuir
@@ -426,7 +435,11 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             continue
         campaign_raw = cell(row, cidx["campaign"])
         ad_raw = cell(row, cidx["ad"]).split("::")[0].strip()   # "AD39_VIDEO_FSE::PAZX.." -> "AD39_VIDEO_FSE"
-        paid = campaign_raw in meta_camps                        # tráfego pago = campanha existe no Meta Ads
+        lead_day = parse_date(cell(row, cidx["created"]))
+        in_meta = campaign_raw in meta_camps
+        paid = in_meta and (campaign_raw, lead_day) in spend_camp_day   # campanha do Meta COM gasto no dia
+        if in_meta and not paid:
+            reclass.append((lead_day, campaign_raw, cell(row, cidx["adset"]), ad_raw))
         src = "meta" if paid else "org"
         phone = canon_phone(cell(row, cidx["phone"]))
         camp = campaign_raw if paid else "(sem campanha)"
@@ -506,6 +519,9 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             "ml": to_float(cell(row, midx["leads"])),
         })
 
+    print(f"  leads de campanha do Meta em dia SEM gasto (viraram orgânicos): {len(reclass)}", file=sys.stderr)
+    for d_, c_, a_, ad_ in sorted(reclass, key=lambda x: x[0] or "")[-30:]:
+        print(f"    - {d_} camp={c_[:60]!r} adset={a_[:30]!r} ad={ad_[:30]!r}", file=sys.stderr)
     n_paid = sum(1 for l in leads if l["src"] == "meta")
     print(f"  leads de tráfego pago (campanha existe no Meta Ads): {n_paid}/{len(leads)}", file=sys.stderr)
 
