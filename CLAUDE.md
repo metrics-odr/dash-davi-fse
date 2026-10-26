@@ -1,4 +1,4 @@
-# CLAUDE.md — Dashboard Secre App · Funil "Publicar Vaga"
+# CLAUDE.md — Dashboard Davi Braga · Funil "Sessão Estratégica"
 
 > Lido automaticamente pelo Claude Code ao abrir o repositório. Mantenha atualizado.
 > Repositório: `metrics-odr/dash-davi-fse` · Pages: `https://metrics-odr.github.io/dash-davi-fse/`
@@ -14,7 +14,7 @@ do Actions e a URL pública.
 
 ## Configuração do cliente
 
-- **Cliente:** Secre App · **Funil:** Publicar Vaga (Sessão Estratégica padrão).
+- **Cliente:** Davi Braga · **Funil:** Sessão Estratégica (Sessão Estratégica padrão).
 - **Leads:** planilha `16FOsujjmymRJdj0tMdFy08qfRJtvXyXIw8HCwHDwwAA`, gid `1895619916`.
   Só entram linhas com coluna **Funil = SE ou FSE**. Com UTMs/anúncio = tráfego pago;
   sem = orgânico.

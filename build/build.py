@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Gera a dashboard estatica (index.html) do funil "Publicar Vaga" (Secre App) a
+Gera a dashboard estatica (index.html) do funil "Sessão Estratégica" (Davi Braga) a
 partir de DUAS planilhas do Google Sheets (somente leitura):
 
   - Planilha de LEADS (aba "Leads Totais_planilha nova", gid 1895619916): fonte
@@ -50,8 +50,8 @@ FUNIS_VALIDOS = ("se", "fse")  # valores aceitos na coluna "Funil"
 EXPORT_URL = "https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
 
 # Identificação do cliente/conta (usada só em textos/relatórios — não afeta o cruzamento de dados).
-CLIENT_NAME = "Secre App"
-MAIN_PRODUCT = "Publicar Vaga"
+CLIENT_NAME = "Davi Braga"
+MAIN_PRODUCT = "Sessão Estratégica"
 # Prefixo comum a TODAS as campanhas da conta (usado para agrupar campanhas no
 # dashboard). Ajuste ao padrão de nomenclatura de campanha deste cliente.
 MAIN_PRODUCT_PREFIX = ""   # vazio: sem filtro por prefixo, todas as campanhas entram
@@ -165,7 +165,7 @@ def is_test_lead(rowtext: str) -> bool:
     return "<test lead" in rowtext.lower()
 
 
-# Critério de MQL (Secre App): faturamento declarado entre R$ 100 mil e R$ 500 mil.
+# Critério de MQL (Davi Braga): faturamento declarado entre R$ 100 mil e R$ 500 mil.
 # O texto da resposta tem várias grafias ("DE 100 A 500 MIL", "100 mil a 500 mil",
 # "2MM", "2 milhões", "1-4 MM", "DE 4M A 10M"). Regra de unidade: "MM"/"milhão/
 # milhões" = milhões; "mil" = mil; "M" sozinho = mil quando o número é >= 100

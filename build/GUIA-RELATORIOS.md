@@ -73,7 +73,7 @@ os Insights.
 
 ## Contexto do funil
 
-**Funil Sessão Estratégica "Publicar Vaga" (Secre App)** — funil padrão de sessão estratégica (SE/FSE); agendamentos não são monitorados por enquanto. Os leads chegam pela planilha de Leads (colunas Telefone, E-mail, Data, Anúncio,
+**Funil Sessão Estratégica "Sessão Estratégica" (Davi Braga)** — funil padrão de sessão estratégica (SE/FSE); agendamentos não são monitorados por enquanto. Os leads chegam pela planilha de Leads (colunas Telefone, E-mail, Data, Anúncio,
 Faturamento, Qualificação, Funil…). Só contam leads com **Funil = SE ou FSE**: os que
 trazem UTMs/anúncio do tráfego são de mídia paga, os demais são orgânicos. O
 critério de qualificação (MQL) é o faturamento declarado entre **R$ 100 e 500 mil**.
