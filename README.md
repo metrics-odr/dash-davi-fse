@@ -1,6 +1,6 @@
-# Dashboard de Captura de Leads · Secre App · Publicar Vaga
+# Dashboard de Captura de Leads · Davi Braga · Sessão Estratégica
 
-Dashboard **100% na nuvem** do Funil de High Ticket de **Secre App (Publicar Vaga)** que cruza a aba **Conversas** (leads via WhatsApp/mensageria) com o
+Dashboard **100% na nuvem** do Funil de High Ticket de **Davi Braga (Sessão Estratégica)** que cruza a aba **Conversas** (leads via WhatsApp/mensageria) com o
 investimento de mídia paga (**Meta Ads**) e com a lista de **Compradores**,
 calcula os **Leads Qualificados (MQLs)** e as **Vendas/Faturamento** atribuídos
 por anúncio, e é publicada no **GitHub Pages**. Reconstrói sozinha a cada
