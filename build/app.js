@@ -430,6 +430,7 @@ const HEAT_HUE={gasto:'--heat-gasto', leads:'--heat-leads', mqls:'--heat-mqls', 
 /* Escala SEMPRE sobre as linhas visíveis (período/filtro ativo). Para um dia
    atípico (outlier) não "achatar" os demais, o teto é o percentil 90 dos valores
    visíveis (quando há >=6 linhas); o máximo real continua no topo da escala. */
+const HEAT_LOWER_BETTER=new Set(['cpm','cpl','cpmql','cac']);
 function heatExtent(arr){
   const vs=arr.filter(v=>v!=null&&isFinite(v)).sort((a,b)=>a-b);
   if(!vs.length) return [0,0];
@@ -440,7 +441,9 @@ function heatExtent(arr){
 function heat(v,lo,hi,kind){
   if(v==null||!isFinite(v)||!HEAT_HUE[kind]) return 'transparent';
   // todos os valores iguais: sem comparação possível; destaca só se > 0
-  const t= hi===lo ? (v>0?0.7:0) : Math.max(0,Math.min(1,(v-lo)/(hi-lo)));
+  let t= hi===lo ? (v>0?0.7:0) : Math.max(0,Math.min(1,(v-lo)/(hi-lo)));
+  // métricas de custo: MENOR = melhor = cor mais intensa (Gasto: maior = mais intenso)
+  if(HEAT_LOWER_BETTER.has(kind) && hi!==lo) t=1-t;
   const c=hx2rgb(cvar(HEAT_HUE[kind]));
   return `rgba(${c[0]},${c[1]},${c[2]},${(0.08+0.52*t).toFixed(3)})`;
 }
@@ -774,7 +777,7 @@ function relRenderAdTable(id,list){
   const cols=[
     {key:'ad',label:'Anúncio',type:'dim',big:true,stk:'l1'},{key:'status',label:'Status',type:'dim',w:140},
     {key:'camp',label:'Campanha',type:'dim',big:true},{key:'adset',label:'Conjunto',type:'dim',big:true},
-    {key:'gasto',label:'Gasto',type:'brl'},{key:'im',label:'Impr.',type:'int'},
+    {key:'gasto',label:'Gasto',type:'brl',heat:'gasto'},{key:'im',label:'Impr.',type:'int'},
     {key:'cpm',label:'CPM',type:'brl'},{key:'ctr',label:'CTR',type:'pct'},
     {key:'leads',label:'Leads',type:'int'},{key:'cpl',label:'CPL',type:'brl'},
     {key:'mqls',label:'MQLs',type:'int'},{key:'tx',label:'Tx‑MQL',type:'pct'},
@@ -955,7 +958,7 @@ function renderRelatorio(){
 /* colunas padrão das tabelas de heatmap por dia (ordem pedida) */
 const DAILY_COLS=[
   {key:'date',label:'Data',type:'date'},{key:'wd',label:'Dia',type:'dim',w:70},
-  {key:'gasto',label:'Gasto',type:'brl'},{key:'cpm',label:'CPM',type:'brl'},
+  {key:'gasto',label:'Gasto',type:'brl',heat:'gasto'},{key:'cpm',label:'CPM',type:'brl'},
   {key:'ctr',label:'CTR',type:'pct'},{key:'cr',label:'CR',type:'pct'},{key:'convlp',label:'ConvLP',type:'pct'},
   {key:'leads',label:'Leads',type:'int'},{key:'cpl',label:'CPL',type:'brl',heat:'cpl'},
   {key:'tx',label:'Tx‑MQL',type:'pct'},{key:'mqls',label:'MQLs',type:'int'},{key:'cpmql',label:'CPMQL',type:'brl',heat:'cpmql'},
