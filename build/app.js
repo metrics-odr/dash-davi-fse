@@ -425,7 +425,8 @@ function renderSplitTable(cfg){
 }
 /* Heatmap por coluna: cor FIXA por métrica (definida em identidade-visual.css),
    só a OPACIDADE varia com o valor (maior valor = mais vibrante). */
-const HEAT_HUE={gasto:'--heat-gasto', leads:'--heat-leads', mqls:'--heat-mqls', roas:'--heat-roas', vendas:'--heat-vendas'};
+const HEAT_HUE={gasto:'--heat-gasto', leads:'--heat-leads', mqls:'--heat-mqls', roas:'--heat-roas', vendas:'--heat-vendas',
+  cpm:'--heat-cpm', cpl:'--heat-cpl', cpmql:'--heat-cpmql', cac:'--heat-cac'};
 /* Escala SEMPRE sobre as linhas visíveis (período/filtro ativo). Para um dia
    atípico (outlier) não "achatar" os demais, o teto é o percentil 90 dos valores
    visíveis (quando há >=6 linhas); o máximo real continua no topo da escala. */
@@ -954,18 +955,16 @@ function renderRelatorio(){
 /* colunas padrão das tabelas de heatmap por dia (ordem pedida) */
 const DAILY_COLS=[
   {key:'date',label:'Data',type:'date'},{key:'wd',label:'Dia',type:'dim',w:70},
-  {key:'gasto',label:'Gasto',type:'brl',heat:'gasto'},{key:'cpm',label:'CPM',type:'brl'},
+  {key:'gasto',label:'Gasto',type:'brl'},{key:'cpm',label:'CPM',type:'brl'},
   {key:'ctr',label:'CTR',type:'pct'},{key:'cr',label:'CR',type:'pct'},{key:'convlp',label:'ConvLP',type:'pct'},
-  {key:'leads',label:'Leads',type:'int',heat:'leads'},{key:'cpl',label:'CPL',type:'brl'},
-  {key:'tx',label:'Tx‑MQL',type:'pct'},{key:'mqls',label:'MQLs',type:'int',heat:'mqls'},{key:'cpmql',label:'CPMQL',type:'brl'},
-  {key:'chk',label:'Checkouts',type:'int'},{key:'vischk',label:'VisCHK',type:'pct'},
-  {key:'convmql',label:'ConvMQL',type:'pct'},{key:'vendas',label:'Vendas',type:'int',heat:'vendas'},{key:'cac',label:'CAC',type:'brl'},
-  {key:'fat',label:'Fat.',type:'brl'},{key:'receita',label:'Receita',type:'brl'},{key:'roas',label:'ROAS',type:'num',heat:'roas'},
+  {key:'leads',label:'Leads',type:'int'},{key:'cpl',label:'CPL',type:'brl',heat:'cpl'},
+  {key:'tx',label:'Tx‑MQL',type:'pct'},{key:'mqls',label:'MQLs',type:'int'},{key:'cpmql',label:'CPMQL',type:'brl',heat:'cpmql'},
+  {key:'convmql',label:'ConvMQL',type:'pct'},{key:'vendas',label:'Vendas',type:'int'},{key:'cac',label:'CAC',type:'brl'},
+  {key:'fat',label:'Fat.',type:'brl'},{key:'receita',label:'Receita',type:'brl'},{key:'roas',label:'ROAS',type:'num'},
 ];
 function dailyCells(x,d,isTotal){
   const s=salesOf(x);
   return {date:isTotal?null:x.d, wd:isTotal?'':weekday(x.d), gasto:d.gasto, cpm:d.cpm, ctr:d.ctr, cr:d.cr, convlp:d.convlp,
-    chk:d.chk, vischk:d.vischk,
     leads:x.leads, cpl:d.cpl, tx:d.tx, mqls:x.mqls, cpmql:d.cpmql,
     convmql:s.convmql, vendas:s.vendas, cac:s.cac, fat:s.fat, receita:s.receita, roas:s.roas};
 }
