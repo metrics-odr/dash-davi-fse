@@ -175,7 +175,7 @@ function renderTable(cfg){
       va=(va==null||!isFinite(va))?-Infinity:va; vb=(vb==null||!isFinite(vb))?-Infinity:vb;
       return dir==='asc'?va-vb:vb-va; }); }
   const ext={};
-  cfg.cols.forEach(c=>{ if(c.heat){ const vs=rows.map(r=>r.cells[c.key]).filter(v=>v!=null&&isFinite(v)); ext[c.key]=[Math.min(...vs),Math.max(...vs)]; }});
+  cfg.cols.forEach(c=>{ if(c.heat){ ext[c.key]=heatExtent(rows.map(r=>r.cells[c.key])); }});
   // métricas de custo sempre com "R$" (mesmo em tabelas densas/fit) — % nas de taxa, sem símbolo nas demais
   const fmt=(t,v)=> t==='brl'?brl(v):t==='pct'?pct(v):t==='int'?intf(v):t==='num'?numf(v):t==='date'?brdate(v):t==='html'?(v==null?'-':String(v)):dimf(v);
   const widths=fit?[]:cfg.cols.map(c=>colWidth(cfg,c)); const totalW=widths.reduce((a,b)=>a+b,0);
@@ -282,7 +282,7 @@ function renderSplitTable(cfg){
       va=(va==null||!isFinite(va))?-Infinity:va; vb=(vb==null||!isFinite(vb))?-Infinity:vb;
       return dir==='asc'?va-vb:vb-va; }); }
   const ext={};
-  cfg.cols.forEach(c=>{ if(c.heat){ const vs=rows.map(r=>r.cells[c.key]).filter(v=>v!=null&&isFinite(v)); ext[c.key]=[Math.min(...vs),Math.max(...vs)]; }});
+  cfg.cols.forEach(c=>{ if(c.heat){ ext[c.key]=heatExtent(rows.map(r=>r.cells[c.key])); }});
   const fmt=(t,v)=> t==='brl'?brl(v):t==='pct'?pct(v):t==='int'?intf(v):t==='num'?numf(v):t==='date'?brdate(v):t==='html'?(v==null?'-':String(v)):dimf(v);
   const esc=s=>String(s==null?'':s).replace(/"/g,'&quot;');
   const leftCols=cfg.cols.filter(c=>c.band==='l'), rightCols=cfg.cols.filter(c=>c.band==='r'), midCols=cfg.cols.filter(c=>!c.band);
@@ -426,11 +426,22 @@ function renderSplitTable(cfg){
 /* Heatmap por coluna: cor FIXA por métrica (definida em identidade-visual.css),
    só a OPACIDADE varia com o valor (maior valor = mais vibrante). */
 const HEAT_HUE={gasto:'--heat-gasto', leads:'--heat-leads', mqls:'--heat-mqls', roas:'--heat-roas', vendas:'--heat-vendas'};
+/* Escala SEMPRE sobre as linhas visíveis (período/filtro ativo). Para um dia
+   atípico (outlier) não "achatar" os demais, o teto é o percentil 90 dos valores
+   visíveis (quando há >=6 linhas); o máximo real continua no topo da escala. */
+function heatExtent(arr){
+  const vs=arr.filter(v=>v!=null&&isFinite(v)).sort((a,b)=>a-b);
+  if(!vs.length) return [0,0];
+  const lo=vs[0], mx=vs[vs.length-1];
+  const hi=vs.length>=6 ? Math.max(vs[Math.floor((vs.length-1)*0.9)], lo) : mx;
+  return [lo, hi>lo?hi:mx];
+}
 function heat(v,lo,hi,kind){
-  if(v==null||!isFinite(v)||hi===lo||!HEAT_HUE[kind]) return 'transparent';
-  const t=Math.max(0,Math.min(1,(v-lo)/(hi-lo)));
+  if(v==null||!isFinite(v)||!HEAT_HUE[kind]) return 'transparent';
+  // todos os valores iguais: sem comparação possível; destaca só se > 0
+  const t= hi===lo ? (v>0?0.7:0) : Math.max(0,Math.min(1,(v-lo)/(hi-lo)));
   const c=hx2rgb(cvar(HEAT_HUE[kind]));
-  return `rgba(${c[0]},${c[1]},${c[2]},${(0.06+0.5*t).toFixed(3)})`;
+  return `rgba(${c[0]},${c[1]},${c[2]},${(0.08+0.52*t).toFixed(3)})`;
 }
 function toggleSet(set,key,ctrl,others){
   if(ctrl){ set.has(key)?set.delete(key):set.add(key); }
