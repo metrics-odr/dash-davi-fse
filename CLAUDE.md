@@ -20,7 +20,7 @@ do Actions e a URL pública.
   gasto naquele dia**; o resto (bio, cursoeduca, direct/null, testes…) é orgânico.
 - **Meta Ads:** planilha `1DY-ANjvq1-ui2PBfICYeqSDhwCte1vfer_ctK8bmEN0`, gid `0`.
 - **Compradores:** aguardando (`GID_SALES` vazio → aba ignorada, vendas "-").
-- **MQL:** coluna Faturamento = **R$ 100 a 500 mil** (`parse_faixa_faturamento`/`is_mql`
+- **MQL Grow (métrica principal):** coluna Faturamento entre **R$ 500 mil e R$ 2 MM**. **MQL BFR:** acima de **R$ 2 MM** (só contagem/visão, **sem CPMQL BFR**). Abaixo de 500 mil não conta (`parse_faixa_faturamento`/`is_mql`/`is_mql_bfr`
   em `build.py`). Grafias variam: "MM"/"milhões" = milhões; "mil" = mil.
 - **Agendamentos:** não monitorados por enquanto.
 - Prefixo de campanha: nenhum (todas entram). `TAX_FACTOR` = 1.13806.
@@ -52,7 +52,7 @@ Duas planilhas (ver "Configuração do cliente"): Leads e Meta Ads.
 URL de export CSV: `https://docs.google.com/spreadsheets/d/<ID>/export?format=csv&gid=<GID>`
 
 ### Regra de Lead Qualificado (MQL)
-Coluna Faturamento entre R$ 100 e 500 mil. Lógica em `build.py` → `is_mql`. O gráfico "Leads por especialidade" (`app.js`,
+MQL Grow = Faturamento entre R$ 500 mil e 2 MM (`is_mql`, campo `q`); MQL BFR = acima de 2 MM (`is_mql_bfr`, campo `qb`). O gráfico "Leads por especialidade" (`app.js`,
 `renderGeralCore`) colore verde/cinza pelo mesmo critério, usando a coluna
 `Especialidades`/`Especialidade` como dimensão.
 

@@ -11,8 +11,9 @@ partir de DUAS planilhas do Google Sheets (somente leitura):
   - Compradores / New Subscriptions: AGUARDANDO (GID_SALES vazio = aba ignorada;
     vendas/faturamento aparecem "-" ate chegar).
 
-Criterio de Lead Qualificado (MQL): coluna "Faturamento" na faixa de R$ 100 a
-500 mil (texto livre com varias grafias — ver parse_faixa_faturamento / is_mql).
+Criterio de Lead Qualificado: coluna "Faturamento". MQL Grow (metrica principal)
+= faixa entre R$ 500 mil e R$ 2 MM; MQL BFR = acima de R$ 2 MM; abaixo de 500 mil
+nao conta (texto livre com varias grafias — ver parse_faixa_faturamento / is_mql).
 
 Este script apenas LE as planilhas (export CSV publico) e emite os REGISTROS
 BRUTOS (leads[], meta[] e sales[]) dentro do HTML. sales[] tem um registro POR
@@ -165,7 +166,8 @@ def is_test_lead(rowtext: str) -> bool:
     return "<test lead" in rowtext.lower()
 
 
-# Critério de MQL (Davi Braga): faturamento declarado entre R$ 100 mil e R$ 500 mil.
+# Critério de MQL (Davi Braga): MQL Grow = faturamento entre R$ 500 mil e R$ 2 MM;
+# MQL BFR = acima de R$ 2 MM; abaixo de R$ 500 mil não é MQL.
 # O texto da resposta tem várias grafias ("DE 100 A 500 MIL", "100 mil a 500 mil",
 # "2MM", "2 milhões", "1-4 MM", "DE 4M A 10M"). Regra de unidade: "MM"/"milhão/
 # milhões" = milhões; "mil" = mil; "M" sozinho = mil quando o número é >= 100
@@ -177,23 +179,33 @@ _NUM_UNIT = re.compile(r"(\d+(?:[.,]\d+)?)\s*(mm|milhoes|milhao|mil|m)?(?![a-z])
 def parse_faixa_faturamento(v: str | None):
     """Devolve (min, max) em reais da faixa escrita, ou None se não der pra ler."""
     t = norm(v)
+    # faixa aberta: "acima de 2 milhoes", "mais de 2MM", "+2 milhoes", "> 2mm"
+    mo = re.search(r"(?:acima|mais)\s*(?:de)?\s*(?:r\$)?\s*(\d+(?:[.,]\d+)?)\s*(mm|milhoes|milhao|mil|m)?(?![a-z])|^[\s>+]+(?:r\$)?\s*(\d+(?:[.,]\d+)?)\s*(mm|milhoes|milhao|mil|m)?(?![a-z])", t)
+    if mo:
+        n = float((mo.group(1) or mo.group(3)).replace(",", "."))
+        u = mo.group(2) or mo.group(4)
+        mult = 1_000_000 if u in ("mm", "milhoes", "milhao") else 1_000 if u == "mil" else (1_000 if (u == "m" and n >= 100) else 1_000_000 if u == "m" else None)
+        if mult:
+            return n * mult, float("inf")
     toks = []
     for m in _NUM_UNIT.finditer(t):
         n = float(m.group(1).replace(",", "."))
         u = m.group(2)
-        toks.append([n, u])
+        toks.append([n, u, False])
     if len(toks) < 2:
         return None
     nxt = None
     for tk in reversed(toks):
         if tk[1] is None:
             tk[1] = nxt
+            tk[2] = True   # unidade herdada
         else:
             nxt = tk[1]
     vals = []
-    for n, u in toks:
+    for n, u, inh in toks:
         if u in ("mm", "milhoes", "milhao"):
-            mult = 1_000_000
+            # "500 a 2 MM": 500 herdou "MM" mas só pode ser mil
+            mult = 1_000 if (inh and n >= 100) else 1_000_000
         elif u == "mil":
             mult = 1_000
         elif u == "m":
@@ -205,9 +217,15 @@ def parse_faixa_faturamento(v: str | None):
 
 
 def is_mql(v: str | None) -> bool:
-    """MQL = faturamento entre 100 e 500 mil."""
+    """MQL Grow (principal) = faturamento entre 500 mil e 2 MM."""
     r = parse_faixa_faturamento(v)
-    return bool(r) and abs(r[0] - 100_000) < 1 and abs(r[1] - 500_000) < 1
+    return bool(r) and r[0] >= 500_000 - 1 and r[1] <= 2_000_000 + 1
+
+
+def is_mql_bfr(v: str | None) -> bool:
+    """MQL BFR = faturamento acima de 2 MM."""
+    r = parse_faixa_faturamento(v)
+    return bool(r) and r[0] >= 2_000_000 - 1
 
 
 def pretty_specialty(v: str) -> str:
@@ -459,7 +477,8 @@ def process(conversas_rows, meta_rows, sales_rows, leads_lp_rows):
             "ad": ad,
             "prof": specialty,
             "bucket": specialty,
-            "q": 1 if is_mql(cell(row, cidx["fat"])) else 0,
+            "q": 1 if is_mql(cell(row, cidx["fat"])) else 0,       # MQL Grow (500 mil – 2 MM)
+            "qb": 1 if is_mql_bfr(cell(row, cidx["fat"])) else 0,  # MQL BFR (> 2 MM)
             "utm": 1 if paid else 0,
             "nm": first_last_initial(cell(row, cidx["name"])),
             "em": "—",
