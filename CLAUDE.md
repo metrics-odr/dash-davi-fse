@@ -123,7 +123,7 @@ SETUP-CRON.md             # valores exatos do cron-job.org (com marcadores a pre
 ```
 
 ### Aba Relatório
-Terceira página (sidebar, entre a de mídia paga e o rodapé). **Espelha a Visão
+Terceira página — **oculta (removida da sidebar a pedido do cliente; código segue no repo, inacessível)**. **Espelha a Visão
 Geral** (mesmo funil/KPIs/gráficos/tabela diária, via `renderGeralCore(REL_IDS)`)
 e, abaixo, acrescenta 3 blocos novos + um painel de metas editável:
 - **Metas & parâmetros (painel editável)** — no topo da aba: Meta CPMQL, Meta CAC, Volume
