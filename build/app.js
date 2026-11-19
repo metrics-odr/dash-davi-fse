@@ -1205,7 +1205,7 @@ function setPage(p){ STATE.page=p;
   document.getElementById('page-geral').classList.toggle('active',p==='geral');
   document.getElementById('page-meta').classList.toggle('active',p==='meta');
   document.getElementById('page-rel').classList.toggle('active',p==='rel');
-  document.getElementById('ptitle').textContent = p==='meta'?'Captura Meta Ads':(p==='rel'?'Relatório':'Visão Geral de Leads');
+  document.getElementById('ptitle').textContent = p==='meta'?'Meta Ads':(p==='rel'?'Relatório':'Visão Geral');
   document.getElementById('navToggle').checked=false;
   history.replaceState(null,'', p==='meta'?'#meta':(p==='rel'?'#rel':'#geral'));
   renderAll();
@@ -1252,7 +1252,7 @@ document.getElementById('buildFoot').textContent='build __BUILD_ID__';
 document.getElementById('buildFoot2').textContent='· build __BUILD_ID__';
 
 syncDateInputs();
-setPage(location.hash==='#meta'?'meta':(location.hash==='#rel'?'rel':'geral'));
+setPage(location.hash==='#meta'?'meta':'geral');
 
 /* auto-refresh com cache-bust ~30 min */
 setTimeout(()=>{ location.href=location.pathname+'?t='+Date.now()+location.hash; }, 30*60*1000);
