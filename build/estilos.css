@@ -382,5 +382,6 @@
   .btn.primary{background:linear-gradient(180deg,#C9A869,#B08A4A); border-color:#B08A4A; font-weight:600}
   :root:not([data-theme="dark"]) .sidebar{background:#14110C}
 
-  /* métricas de custo (CPM/CPL/CPMQL/CAC) centralizadas nas tabelas */
-  table.dt th.cost-c, table.dt td.cost-c, table.dt tfoot td.cost-c{text-align:center}
+  /* todas as métricas centralizadas nas tabelas; só as dimensões (nomes) ficam à esquerda */
+  table.dt thead th:not(.dim), table.dt tbody td:not(.dim), table.dt tfoot td:not(.dim){text-align:center}
+  table.dt thead th.dim, table.dt td.dim, table.dt tfoot td.dim{text-align:left}
