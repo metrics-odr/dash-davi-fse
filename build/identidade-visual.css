@@ -1,64 +1,51 @@
 /* ============================================================================
-   IDENTIDADE VISUAL — TODAS as cores da dashboard ficam AQUI.
-   Este arquivo NÃO tem lógica de dados nem layout: mexa aqui para trocar cores.
-   O tema CLARO é o padrão; o ESCURO é a versão alternativa (toggle).
+   IDENTIDADE VISUAL — FSE · Davi Braga
+   Preto + dourado. TODAS as cores ficam AQUI.
+   Tema ESCURO (preto/dourado) é o padrão; o CLARO (marfim) é a alternativa (toggle).
    ============================================================================ */
 
-/* ------------------------------ TEMA CLARO (padrão) ------------------------ */
+/* ------------------------------ TEMA CLARO (alternativo) -------------------- */
 :root{
-  --text-primary:#1A1D2E; --bg:#F4F5F8; --surface:#FFFFFF; --border:#E6E8EE;
-  --muted:#6B7280; --ink:#1A1D2E; --selected:#DBEAFE;
-  --accent-blue:#3B5BDB; --accent-blue-light:#EEF2FF;
-  --good:#0CA30C; --bad:#E34948; --yellow:#E8A400; --aqua:#1BAF7A; --red:#E34948; --black:#1A1D2E;
-  --grid:#EEF0F5; --thead:#F5F7FB; --tfoot:#EEF1F7;
-  /* séries de gráfico (paleta) */
-  --cc1:#3B5BDB; --cc2:#1BAF7A; --cc3:#E34948; --cc4:#E8A400; --cc5:#8AA0F0;
-  --cc6:#9B59B6; --cc7:#16A085; --cc8:#E67E22; --cc9:#F97316; --cc10:#6366F1;
-  /* linhas semânticas dos gráficos (Leads/MQLs/Gasto/CPL/CPMQL) */
-  --chart-leads:#3B5BDB; --chart-mqls:#0891B2; --chart-gasto:#E34948;
-  --chart-cpl:#1A1D2E; --chart-cpmql:#E8A400;
-  /* barras auxiliares */
-  --bar-q:#1BAF7A; --bar-noq:#B3B1A8;
-  /* heatmap por coluna (uma cor fixa por métrica; a opacidade varia no JS) */
-  --heat-gasto:#E34948; --heat-leads:#3B5BDB; --heat-mqls:#0891B2; --heat-roas:#FFD400; --heat-vendas:#1BAF7A;
-  /* destaque de etapas do funil (Mar01): MQL azulado · Gasto avermelhado · Faturamento/Receita esverdeado */
-  --step-mql-bg:#EAF0FF; --step-mql-bd:#3B5BDB;
-  --step-gasto-bg:#FDECEC; --step-gasto-bd:#E34948;
-  --step-fat-bg:#E9F9EE; --step-fat-bd:#0CA30C;
+  --text-primary:#14110C; --bg:#F6F2EA; --surface:#FFFFFF; --border:#E7DFCE;
+  --muted:#7A705D; --ink:#1E1A12; --selected:#F2E6C9;
+  --accent-blue:#9A7330; --accent-blue-light:#F7EFDC; --accent-soft:rgba(154,115,48,.16); --on-accent:#FFFFFF;
+  --good:#1E9E63; --bad:#D6453D; --yellow:#C98A10; --aqua:#2A98AE; --red:#D6453D; --black:#1E1A12;
+  --grid:#EFE8D8; --thead:#F8F3E7; --tfoot:#F2EBD9;
+  --cc1:#9A7330; --cc2:#1E9E63; --cc3:#D6453D; --cc4:#C98A10; --cc5:#6F5BB0;
+  --cc6:#2A98AE; --cc7:#B5652F; --cc8:#7C9A2E; --cc9:#8A5A1F; --cc10:#5C6BB8;
+  --chart-leads:#9A7330; --chart-mqls:#2A98AE; --chart-gasto:#D6453D;
+  --chart-cpl:#1E1A12; --chart-cpmql:#C98A10;
+  --bar-q:#1E9E63; --bar-noq:#BDB5A2;
+  --heat-gasto:#D6453D; --heat-leads:#9A7330; --heat-mqls:#2A98AE; --heat-roas:#E0B400; --heat-vendas:#1E9E63;
+  --heat-cpl:#C9722F; --heat-cpmql:#8B5CF6; --heat-cac:#C2306A; --heat-fat:#4E9A5B;
+  --step-mql-bg:#E4F3F6; --step-mql-bd:#2A98AE;
+  --step-gasto-bg:#FBE9E7; --step-gasto-bd:#D6453D;
+  --step-fat-bg:#E6F6EC; --step-fat-bd:#1E9E63;
 }
 
-/* ------------------------------ TEMA ESCURO (toggle) ----------------------- */
+/* ------------------------------ TEMA ESCURO (padrão) ------------------------ */
 :root[data-theme="dark"]{
-  --text-primary:#0A0C11;      /* fundo da sidebar (mais escuro que o fundo principal) */
-  --bg:#0F1117;                /* Fundo principal */
-  --surface:#171A22;           /* Cards */
-  --border:#2A2F3A;            /* Bordas */
-  --ink:#F2F3F5;               /* Texto principal */
-  --muted:#9AA1AD;             /* Texto secundário */
-  --accent-blue:#5B7BF0;       /* Accent: botões, links, abas ativas, foco */
-  --accent-blue-light:#1B2440; /* fundo sutil azulado: badges, hover de linha, hero */
-  --selected:#26365F;          /* Linha selecionada */
-  --good:#22C55E;              /* Positivo */
-  --bad:#EF4444;               /* Negativo */
-  --red:#EF4444;
-  --yellow:#F59E0B;            /* Alerta */
-  --aqua:#06B6D4;              /* Info */
-  --black:#0F1117;
-  --grid:#252A34;              /* Linhas do gráfico */
-  --thead:#1E222C;             /* Cabeçalho de tabela */
-  --tfoot:#1B1F27;
-  /* PALETA dos GRÁFICOS — mais vívida/saturada (até 10 séries) */
-  --cc1:#2F6BFF; --cc2:#16D66B; --cc3:#FF3B47; --cc4:#FFB020; --cc5:#9D5CFF;
-  --cc6:#1FD5EC; --cc7:#FF4D8D; --cc8:#9BE015; --cc9:#FF8A1F; --cc10:#6D7BFF;
-  /* linhas semânticas dos gráficos (vívidas) */
-  --chart-leads:#2F6BFF; --chart-mqls:#22D3EE; --chart-gasto:#FF3B47;
-  --chart-cpl:#F2F3F5; --chart-cpmql:#FFB020;
-  /* barras auxiliares */
-  --bar-q:#16D66B; --bar-noq:#5A6070;
-  /* heatmap por coluna: Gasto vermelho · Leads azul · MQLs ciano · Vendas verde · ROAS amarelo */
-  --heat-gasto:#EF4444; --heat-leads:#3B82F6; --heat-mqls:#22D3EE; --heat-roas:#FFD400; --heat-vendas:#22C55E;
-  /* destaque de etapas do funil (Mar01): MQL azulado · Gasto avermelhado · Faturamento/Receita esverdeado */
-  --step-mql-bg:#16233F; --step-mql-bd:#5B7BF0;
-  --step-gasto-bg:#3A1D20; --step-gasto-bd:#EF4444;
-  --step-fat-bg:#132B1D; --step-fat-bd:#22C55E;
+  --text-primary:#000000;      /* sidebar */
+  --bg:#000000;                /* fundo principal (preto da marca) */
+  --surface:#1B1915;           /* cards */
+  --border:#4B4335;
+  --ink:#F3EDE0;               /* texto principal (marfim) */
+  --muted:#A89F8C;
+  --accent-blue:#C9A55C;       /* ACCENT = dourado da marca (nome da var herdado do motor) */
+  --accent-blue-light:#221C10; --range-bg:rgba(201,165,92,.38); --range-ink:#FFF4D9; --accent-soft:rgba(201,165,92,.16); --on-accent:#17120A;
+  --selected:#3A2F18;
+  --good:#3FB68B; --bad:#E5534B; --red:#E5534B; --yellow:#E8B04A; --aqua:#5BB5C9; --black:#000000;
+  --grid:#2F2A21; --thead:#25211A; --tfoot:#211D16;
+  --cc1:#C9A55C; --cc2:#3FB68B; --cc3:#E5534B; --cc4:#F0D58E; --cc5:#8D7BC9;
+  --cc6:#5BB5C9; --cc7:#D98A5B; --cc8:#9BBF5A; --cc9:#B07A3C; --cc10:#7F8FD1;
+  --chart-leads:#C9A55C; --chart-mqls:#5BB5C9; --chart-gasto:#E5534B;
+  --chart-cpl:#F3EDE0; --chart-cpmql:#E89B3C;
+  --bar-q:#3FB68B; --bar-noq:#5A5446;
+  --heat-gasto:#E5534B; --heat-leads:#C9A55C; --heat-mqls:#5BB5C9; --heat-roas:#FFD400; --heat-vendas:#3FB68B;
+  --heat-cpl:#E89B3C; --heat-cpmql:#A78BFA; --heat-cac:#F472B6; --heat-fat:#6FBF73;
+  --step-mql-bg:#10242A; --step-mql-bd:#5BB5C9;
+  --step-gasto-bg:#321A18; --step-gasto-bd:#E5534B;
+  --step-fat-bg:#12291F; --step-fat-bd:#3FB68B;
 }
+/* tag Tráfego Pago (azul) no tema escuro */
+:root[data-theme="dark"] .tag-pago, [data-theme="dark"] .tag-pago{color:#8DB8FF; background:rgba(59,130,246,.16); border-color:rgba(96,165,250,.6)}
