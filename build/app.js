@@ -617,9 +617,9 @@ function renderGeralCore(ids){
     ['Cliques', intf(t.cl), [['CTR',pct(dv.ctr)],['CPC',brl(dv.cpc)]]],
     ['Page Views', intf(t.pv), [['CR',pct(dv.cr)],['CPV',brl(dv.cpv)]]],
     ['Leads', intf(t.leads), [['CPL',brl(dv.cpl)],['ConvLP',pct(dv.convlp)]]],
-    ['MQLs Grow (R$ 500 mil–2 mi)', intf(t.mqls), [['Tx‑MQL Grow',pct(dv.tx)],['CPMQL',brl(dv.cpmql)]], false, 'hl-mql'],
+    ['MQLs Grow (R$ 500 mil–2 mi)', intf(t.mqls), [['Tx‑MQL',pct(dv.tx)],['CPMQL',brl(dv.cpmql)]], false, 'hl-mql'],
     ['MQLs Grow BFR (> R$ 2 mi)', intf(t.mqlsBfr), [['% dos Leads',pct(t.leads?t.mqlsBfr/t.leads:null)],['BFR/Grow',(t.mqls?numf(t.mqlsBfr/t.mqls):'-')]], false, 'hl-mql'],
-    ['Vendas', s.vendas!=null?intf(s.vendas):NA, [['ConvMQL Grow',s.convmql!=null?pct(s.convmql):NA],['CAC',s.cac!=null?brl(s.cac):NA]], s.vendas==null],
+    ['Vendas', s.vendas!=null?intf(s.vendas):NA, [['ConvMQL',s.convmql!=null?pct(s.convmql):NA],['CAC',s.cac!=null?brl(s.cac):NA]], s.vendas==null],
     ['Receita', s.receita!=null?brl(s.receita):NA, [['ROAS',s.roasReceita!=null?numf(s.roasReceita):NA],['Ticket',s.tmReceita!=null?brl(s.tmReceita):NA]], s.receita==null, 'hl-fat'],
     ['Faturamento', s.fat!=null?brl(s.fat):NA, [['ROAS',s.roas!=null?numf(s.roas):NA],['Ticket',s.tm!=null?brl(s.tm):NA]], s.fat==null, 'hl-fat'],
   ];
@@ -761,8 +761,8 @@ const AD_COLS=[
   {k:'ad',label:'Anúncio',dim:true,stk:'l1'},{k:'status',label:'Status',dim:true,stk:'l2'},
   {k:'camp',label:'Campanha',dim:true},{k:'adset',label:'Conjunto',dim:true},
   {k:'gasto',label:'Gasto'},{k:'im',label:'Impr.'},{k:'cpm',label:'CPM'},{k:'ctr',label:'CTR'},
-  {k:'leads',label:'Leads'},{k:'cpl',label:'CPL'},{k:'mqls',label:'MQLs Grow'},{k:'tx',label:'Tx‑MQL Grow'},{k:'cpmql',label:'CPMQL'},
-  {k:'convmql',label:'ConvMQL Grow'},{k:'vendas',label:'Vendas'},{k:'cac',label:'CAC'},{k:'fat',label:'Faturamento'},{k:'roas',label:'ROAS'},
+  {k:'leads',label:'Leads'},{k:'cpl',label:'CPL'},{k:'mqls',label:'MQLs Grow'},{k:'tx',label:'Tx‑MQL'},{k:'cpmql',label:'CPMQL'},
+  {k:'convmql',label:'ConvMQL'},{k:'vendas',label:'Vendas'},{k:'cac',label:'CAC'},{k:'fat',label:'Faturamento'},{k:'roas',label:'ROAS'},
   {k:'link',label:'Link',dim:true,stk:'r'},
 ];
 function adRowCells(ad,a,struct){
@@ -783,9 +783,9 @@ function relRenderAdTable(id,list){
     {key:'gasto',label:'Gasto',type:'brl',heat:'gasto'},{key:'im',label:'Impr.',type:'int'},
     {key:'cpm',label:'CPM',type:'brl'},{key:'ctr',label:'CTR',type:'pct'},
     {key:'leads',label:'Leads',type:'int'},{key:'cpl',label:'CPL',type:'brl'},
-    {key:'mqls',label:'MQLs Grow',type:'int'},{key:'tx',label:'Tx‑MQL Grow',type:'pct'},
+    {key:'mqls',label:'MQLs Grow',type:'int'},{key:'tx',label:'Tx‑MQL',type:'pct'},
     {key:'cpmql',label:'CPMQL',type:'brl'},
-    {key:'convmql',label:'ConvMQL Grow',type:'pct'},
+    {key:'convmql',label:'ConvMQL',type:'pct'},
     {key:'vendas',label:'Vendas',type:'int'},
     {key:'cac',label:'CAC',type:'brl'},
     {key:'fat',label:'Faturamento',type:'brl'},
@@ -964,8 +964,8 @@ const DAILY_COLS=[
   {key:'gasto',label:'Gasto',type:'brl',heat:'gasto'},{key:'cpm',label:'CPM',type:'brl'},
   {key:'ctr',label:'CTR',type:'pct'},{key:'cr',label:'CR',type:'pct'},{key:'convlp',label:'ConvLP',type:'pct'},
   {key:'leads',label:'Leads',type:'int'},{key:'cpl',label:'CPL',type:'brl',heat:'cpl'},
-  {key:'tx',label:'Tx‑MQL Grow',type:'pct'},{key:'mqls',label:'MQLs Grow',type:'int'},{key:'cpmql',label:'CPMQL',type:'brl',heat:'cpmql'},
-  {key:'convmql',label:'ConvMQL Grow',type:'pct'},{key:'vendas',label:'Vendas',type:'int'},{key:'cac',label:'CAC',type:'brl'},
+  {key:'tx',label:'Tx‑MQL',type:'pct'},{key:'mqls',label:'MQLs Grow',type:'int'},{key:'cpmql',label:'CPMQL',type:'brl',heat:'cpmql'},
+  {key:'convmql',label:'ConvMQL',type:'pct'},{key:'vendas',label:'Vendas',type:'int'},{key:'cac',label:'CAC',type:'brl'},
   {key:'fat',label:'Fat.',type:'brl'},{key:'receita',label:'Receita',type:'brl'},{key:'roas',label:'ROAS',type:'num'},
 ];
 function dailyCells(x,d,isTotal){
@@ -992,7 +992,7 @@ function indChart(id, labels, series){
       scales:sc}});
 }
 /* Mostra os 3 gráficos conforme os dados do período:
-   CPM/CTR sempre · LP (pv>0): CR + ConvLP, senão ConvForm (Leads/Cliques) · Tx‑MQL Grow só se houver MQL. */
+   CPM/CTR sempre · LP (pv>0): CR + ConvLP, senão ConvForm (Leads/Cliques) · Tx‑MQL só se houver MQL. */
 function renderIndicadores(fL,fM,fS){
   const d=daily(fL,fM,fS), labels=d.map(x=>x.d.slice(5)), pal=chartPalette();
   const r=(n)=>n==null?null:+n.toFixed(4), rate=(n,m)=>m?r(n/m):null;
@@ -1012,7 +1012,7 @@ function renderIndicadores(fL,fM,fS){
     indChart('mIndMid', labels, [{label:'ConvForm',data:d.map(x=>rate(x.leads,x.cl)),color:pal[3],axis:'y',fmt:fPct}]);
   }
   const tx=document.getElementById('mIndTxCard'); if(tx) tx.style.display=hasMql?'':'none';
-  if(hasMql) indChart('mIndTx', labels, [{label:'Tx‑MQL Grow',data:d.map(x=>rate(x.mqls,x.leads)),color:pal[2],axis:'y',fmt:fPct}]);
+  if(hasMql) indChart('mIndTx', labels, [{label:'Tx‑MQL',data:d.map(x=>rate(x.mqls,x.leads)),color:pal[2],axis:'y',fmt:fPct}]);
   else destroy('mIndTx');
 }
 
@@ -1044,9 +1044,9 @@ function renderMeta(){
     ['Cliques', intf(t.cl), [['CTR',pct(dv.ctr)],['CPC',brl(dv.cpc)]]],
     ['Page Views', intf(t.pv), [['CR',pct(dv.cr)],['CPV',brl(dv.cpv)]]],
     ['Leads', intf(t.leads), [['CPL',brl(dv.cpl)],['ConvLP',pct(dv.convlp)]]],
-    ['MQLs Grow (R$ 500 mil–2 mi)', intf(t.mqls), [['Tx‑MQL Grow',pct(dv.tx)],['CPMQL',brl(dv.cpmql)]], false, 'hl-mql'],
+    ['MQLs Grow (R$ 500 mil–2 mi)', intf(t.mqls), [['Tx‑MQL',pct(dv.tx)],['CPMQL',brl(dv.cpmql)]], false, 'hl-mql'],
     ['MQLs Grow BFR (> R$ 2 mi)', intf(t.mqlsBfr), [['% dos Leads',pct(t.leads?t.mqlsBfr/t.leads:null)],['BFR/Grow',(t.mqls?numf(t.mqlsBfr/t.mqls):'-')]], false, 'hl-mql'],
-    ['Vendas', s.vendas!=null?intf(s.vendas):NA, [['ConvMQL Grow',s.convmql!=null?pct(s.convmql):NA],['CAC',s.cac!=null?brl(s.cac):NA]], s.vendas==null],
+    ['Vendas', s.vendas!=null?intf(s.vendas):NA, [['ConvMQL',s.convmql!=null?pct(s.convmql):NA],['CAC',s.cac!=null?brl(s.cac):NA]], s.vendas==null],
     ['Receita', s.receita!=null?brl(s.receita):NA, [['ROAS',s.roasReceita!=null?numf(s.roasReceita):NA],['Ticket',s.tmReceita!=null?brl(s.tmReceita):NA]], s.receita==null, 'hl-fat'],
     ['Faturamento', s.fat!=null?brl(s.fat):NA, [['ROAS',s.roas!=null?numf(s.roas):NA],['Ticket',s.tm!=null?brl(s.tm):NA]], s.fat==null, 'hl-fat'],
   ];
@@ -1092,9 +1092,9 @@ function renderMeta(){
     {key:'cpm',label:'CPM',type:'brl'},
     {key:'ctr',label:'CTR',type:'pct'},{key:'cr',label:'CR',type:'pct'},{key:'convlp',label:'ConvLP',type:'pct'},
     {key:'leads',label:'Leads',type:'int'},{key:'cpl',label:'CPL',type:'brl',heat:'cpl'},
-    {key:'tx',label:'Tx‑MQL Grow',type:'pct'},
+    {key:'tx',label:'Tx‑MQL',type:'pct'},
     {key:'mqls',label:'MQLs Grow',type:'int'},{key:'cpmql',label:'CPMQL',type:'brl',heat:'cpmql'},
-    {key:'convmql',label:'ConvMQL Grow',type:'pct'},{key:'vendas',label:'Vendas',type:'int'},{key:'cac',label:'CAC',type:'brl'},
+    {key:'convmql',label:'ConvMQL',type:'pct'},{key:'vendas',label:'Vendas',type:'int'},{key:'cac',label:'CAC',type:'brl'},
     {key:'fat',label:'Fat.',type:'brl'},{key:'receita',label:'Receita',type:'brl'},{key:'roas',label:'ROAS',type:'num'},
   ];
   function hierRows(map){ return Object.entries(map).map(([k,a])=>{const d=derive(a),s=salesOf(a);
