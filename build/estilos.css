@@ -9,13 +9,14 @@
 
   /* ---------- Sidebar ---------- */
   .sidebar{width:220px; flex:0 0 220px; background:var(--text-primary); color:#fff; position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:40}
-  .sidebar .logo{padding:20px 20px 14px}
-  .sidebar .logo-main{font-weight:800; font-size:18px; letter-spacing:.02em}
+  .sidebar .logo{padding:22px 20px 16px; text-align:center; border-bottom:1px solid rgba(201,165,92,.18)}
+  .sidebar .logo-main{font-family:'Lora',Georgia,serif; font-style:italic; font-weight:500; font-size:19px; letter-spacing:.02em; color:#E3C98B}
   .sidebar .logo-sub{font-size:.7rem; text-transform:uppercase; letter-spacing:.14em; opacity:.35; margin-top:2px}
-  .sidebar .sec{font-size:.65rem; text-transform:uppercase; letter-spacing:.1em; opacity:.3; padding:16px 20px 6px}
-  .nav-item{display:flex; align-items:center; gap:10px; padding:10px 20px; color:#c7c9d6; cursor:pointer; border-left:3px solid transparent; font-size:13.5px}
-  .nav-item:hover{background:rgba(255,255,255,.06); color:#fff}
-  .nav-item.active{background:rgba(59,91,219,.18); color:#fff; border-left-color:var(--accent-blue)}
+  .sidebar .sec{font-size:.62rem; font-weight:600; text-transform:uppercase; letter-spacing:.16em; color:#8a8fa8; opacity:.75; padding:18px 20px 8px}
+  .nav-item{display:flex; align-items:center; gap:14px; padding:11px 20px; color:#d4d6e2; cursor:pointer; border-left:3px solid transparent; font-size:13.5px; font-weight:500; transition:background .15s,color .15s}
+  .nav-item:hover{background:rgba(255,255,255,.05); color:#fff}
+  .nav-item.active{background:var(--accent-soft); color:#fff; border-left-color:var(--accent-blue)}
+  .nav-item.active .ic,.nav-item:hover .ic{color:#fff}
   .nav-item .ic{width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; opacity:.9; flex:none}
   .nav-item.active .ic,.nav-item:hover .ic{opacity:1}
   .sidebar .foot{margin-top:auto; border-top:1px solid rgba(255,255,255,.08); padding:12px 20px; font-size:11px; opacity:.35}
@@ -25,18 +26,19 @@
   .main-area{margin-left:220px; flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
 
   /* ---------- Topbar ---------- */
-  .topbar{position:sticky; top:0; z-index:30; background:var(--surface); border-bottom:1px solid var(--border); min-height:64px;
+  .topbar{position:sticky; top:0; z-index:30; background:color-mix(in srgb, var(--surface) 72%, transparent);
+    -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%); border-bottom:1px solid var(--border); min-height:64px;
     display:flex; align-items:center; gap:12px; padding:8px 20px; flex-wrap:wrap}
   .topbar .ptitle{font-weight:700; font-size:16px; white-space:nowrap}
   .sep{width:1px; height:26px; background:var(--border)}
   .chip{border:1px solid var(--border); background:var(--surface); color:var(--ink); border-radius:999px; padding:5px 10px; font-size:12px; cursor:pointer; white-space:nowrap}
   .chip:hover{border-color:var(--accent-blue); color:var(--accent-blue)}
-  .chip.active{background:var(--accent-blue); border-color:var(--accent-blue); color:#fff}
+  .chip.active{background:var(--accent-blue); border-color:var(--accent-blue); color:var(--on-accent)}
 
   /* ---------- Seletor de período (estilo Data Studio) ---------- */
   .period-picker{position:relative}
   .period-btn{gap:9px}
-  .period-btn .period-ic{font-size:14px; line-height:1}
+  .period-btn .period-ic{display:inline-flex; color:var(--accent-blue)} .period-btn .period-ic svg{width:15px; height:15px}
   .period-btn .period-label{font-variant-numeric:tabular-nums}
   .period-btn .period-caret{color:var(--muted); font-size:10px}
   .period-pop{position:absolute; top:calc(100% + 8px); left:0; z-index:60; width:600px; max-width:94vw;
@@ -47,7 +49,7 @@
   .pp-presets{display:flex; flex-direction:column; gap:3px; padding:12px 10px; border-right:1px solid var(--border); min-width:132px; background:var(--bg)}
   .pp-preset{text-align:left; border:1px solid transparent; background:transparent; color:var(--ink); border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; white-space:nowrap}
   .pp-preset:hover{background:var(--accent-blue-light); border-color:var(--border)}
-  .pp-preset.active{background:var(--accent-blue); border-color:var(--accent-blue); color:#fff; font-weight:600}
+  .pp-preset.active{background:var(--accent-blue); border-color:var(--accent-blue); color:var(--on-accent); font-weight:600}
   .pp-cals{display:flex; gap:12px; padding:12px 12px; flex:1 1 auto; min-width:0; flex-wrap:nowrap}
   .pp-cal{flex:1 1 0; min-width:0}
   .pp-cal-head .pp-cal-title{font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600}
@@ -61,8 +63,8 @@
   .pp-day{aspect-ratio:1/1; border:1px solid transparent; background:transparent; color:var(--ink); border-radius:50%; cursor:pointer; font-size:10.5px; display:inline-flex; align-items:center; justify-content:center; padding:0}
   .pp-day:hover:not(.empty){border-color:var(--accent-blue)}
   .pp-day.empty{cursor:default}
-  .pp-day.in{background:var(--accent-blue-light); border-radius:0}
-  .pp-day.sel{background:var(--accent-blue); color:#fff; border-radius:50%; font-weight:600}
+  .pp-day.in{background:var(--range-bg,var(--accent-blue-light)); border-radius:0; color:var(--range-ink,var(--ink)); font-weight:600}
+  .pp-day.sel{background:var(--accent-blue); color:var(--on-accent); border-radius:50%; font-weight:600}
   .pp-day.in.edge-l{border-top-left-radius:50%; border-bottom-left-radius:50%}
   .pp-day.in.edge-r{border-top-right-radius:50%; border-bottom-right-radius:50%}
   .pp-foot{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border-top:1px solid var(--border); background:var(--bg)}
@@ -73,7 +75,7 @@
   .updated{font-size:11.5px; color:var(--muted); text-align:right; line-height:1.3}
   .btn{border:1px solid var(--border); background:var(--surface); color:var(--ink); border-radius:9px; padding:8px 12px; font-size:12.5px; cursor:pointer; display:inline-flex; gap:7px; align-items:center; white-space:nowrap}
   .btn:hover{border-color:var(--accent-blue)}
-  .btn.primary{background:var(--accent-blue); border-color:var(--accent-blue); color:#fff}
+  .btn.primary{background:var(--accent-blue); border-color:var(--accent-blue); color:var(--on-accent)}
   .btn.primary:hover{filter:brightness(1.06)}
   .btn .spin{display:inline-block}
   .btn.loading .spin{animation:spin .8s linear infinite}
@@ -101,7 +103,7 @@
      disponível — sem isso, o grid podia "vazar" e criar scroll horizontal na PÁGINA. */
   .two-col{grid-template-columns:380px minmax(0,1fr)}
   .three-col{grid-template-columns:360px minmax(0,1fr)}
-  .funnel-grid{grid-template-columns:340px minmax(0,1fr); align-items:start}
+  .funnel-grid{grid-template-columns:370px minmax(0,1fr); align-items:start}
   .funnel-charts{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-content:start}
   /* Mar02: três colunas de tamanho igual · Mar05: quatro gráficos na mesma linha */
   .trio{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; align-items:stretch}
@@ -144,7 +146,7 @@
 
   /* Funnel */
   .funnel{display:flex; flex-direction:column; gap:7px}
-  .step{display:flex; align-items:center; justify-content:space-between; gap:14px; row-gap:8px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 15px; border-left:4px solid var(--accent-blue)}
+  .step{display:flex; align-items:center; justify-content:space-between; gap:14px; row-gap:8px; flex-wrap:wrap; min-height:72px; box-sizing:border-box; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 15px; border-left:4px solid var(--accent-blue)}
   .step.na{border-left-color:var(--border); opacity:.7}
   /* Mar01: destaque das etapas MQL (azulado), Gasto (avermelhado) e Receita/Faturamento (esverdeado) + fonte mais forte */
   .step.hl-mql{background:var(--step-mql-bg); border-left-color:var(--step-mql-bd)}
@@ -162,7 +164,7 @@
 
   /* Tables */
   .table-chart-pair{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:16px}
-  .table-chart-pair .thead-title{padding:12px 15px 0; font-weight:600; font-size:14px}
+  .table-chart-pair .thead-title{padding:12px 15px 6px; font-weight:600; font-size:14px}
   .tbl-wrap{overflow:auto; position:relative; scrollbar-width:thin; scrollbar-color:var(--border) transparent}
   .tbl-wrap::-webkit-scrollbar{width:7px; height:7px}
   .tbl-wrap::-webkit-scrollbar-track{background:transparent}
@@ -173,7 +175,7 @@
   .tbl-double{max-height:420px}
   table.dt{border-collapse:separate; border-spacing:0; min-width:100%; font-size:12.5px; table-layout:fixed}
   table.dt th, table.dt td{padding:7px 10px; border-bottom:1px solid var(--border); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  table.dt thead th{position:sticky; top:0; z-index:2; background:var(--thead); color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; text-align:right; cursor:pointer; user-select:none}
+  table.dt thead th{position:sticky; top:0; z-index:2; background:var(--thead); color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; text-align:right; cursor:pointer; user-select:none; vertical-align:middle}
   table.dt thead th .rsz{position:absolute; right:0; top:0; width:9px; height:100%; cursor:col-resize; z-index:3}
   table.dt thead th .rsz:hover{background:var(--accent-blue); opacity:.5}
   /* dimensão (campanha/conjunto/anúncio) NUNCA quebra linha: a largura padrão já
@@ -200,7 +202,7 @@
   table.dt.dt-fit td{overflow:hidden; text-overflow:ellipsis}
   table.dt.dt-fit td.dim{white-space:normal; word-break:break-word}
   /* cabeçalho denso: fonte menor, sem espaçamento e podendo quebrar (não corta o nome) */
-  table.dt.dt-fit thead th{font-size:10px; letter-spacing:0; white-space:normal; line-height:1.12; padding:6px 4px; vertical-align:bottom}
+  table.dt.dt-fit thead th{font-size:10px; letter-spacing:0; white-space:normal; line-height:1.12; padding:6px 4px; vertical-align:middle}
   table.dt.dt-fit thead th .rsz{display:none}   /* sem redimensionar quando é fit-to-width */
   /* Donut de taxa de qualificação (Mar02) com rótulo central */
   .donut-wrap{position:relative; height:190px}
@@ -231,9 +233,12 @@
   .foot{margin-top:26px; font-size:11.5px; color:var(--muted); border-top:1px solid var(--border); padding-top:12px}
 
   @media(max-width:900px){
-    .sidebar{transform:translateX(-100%); transition:transform .2s}
-    #navToggle:checked ~ .sidebar{transform:none}
-    .main-area{margin-left:0}
+    html,body{overflow-x:hidden}
+    .sidebar{transform:translateX(-100%); transition:transform .2s; z-index:50}
+    #navToggle:checked ~ .sidebar{transform:none; box-shadow:2px 0 24px rgba(0,0,0,.35)}
+    .main-area{margin-left:0; min-width:0}
+    .page-content{padding:16px 14px 48px}
+    .topbar{padding:8px 12px; gap:8px}
     label.ham{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid var(--border); border-radius:9px; cursor:pointer; background:var(--surface)}
   }
 
@@ -370,3 +375,9 @@
   .rel-wa-copy{font-size:12px; font-weight:700; padding:5px 12px; border-radius:8px; border:1px solid var(--border); background:var(--accent-blue); color:#fff; cursor:pointer}
   .rel-wa-copy:hover{opacity:.9}
   .rel-wa-box{white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.55; margin:0; user-select:all; color:var(--ink)}
+
+
+  /* ---- Identidade: títulos em serifada (Lora), botão primário dourado ---- */
+  .ptitle,.sec-title,.rel-title{font-family:'Lora',Georgia,serif; font-weight:500; letter-spacing:.01em}
+  .btn.primary{background:linear-gradient(180deg,#C9A869,#B08A4A); border-color:#B08A4A; font-weight:600}
+  :root:not([data-theme="dark"]) .sidebar{background:#14110C}
